@@ -1,4 +1,4 @@
-# Multistate In-situ Sensor Testbed (MIST)
+# Multistate In-situ Sensor Testbeds (MIST)
 
 The goal of the project is to deploy soil moisture testbeds across multiple states to evaluate, calibrate, and disseminate existing and emerging research-grade and consumer-grade in-situ sensing technologies.
 

@@ -1,0 +1,65 @@
+'CR300 Series Datalogger
+
+'Date: 25 March 2022
+'Program author: Nathaniel Parker, Lynn, and Andres Patrignani
+
+'Declare Constants
+'Example:
+'CONST PI = 3.141592654 or Const PI = 4*ATN(1)
+Const R_c = 0.33 'cable resistsnace in ohms
+const I_c = 18 'supply current to ML3 thetaprobe in milliamps
+
+'Declare Public Variables
+'Example:
+Public PTemp, Batt_volt  
+
+'Declare Theta Probe Variables
+Public Theta_V 'Volts from Theta Probes
+Public Theta_VWC 'VWC from Theta Probes
+Public V_ratio  'voltage ratio between supply an excitation voltage
+Public Resistance 'Resistance
+Public Temp 'Temperature from Theta Probes
+
+'Declare units
+Units Theta_V = V
+Units Theta_VWC = cm^3 / cm^3
+Units Resistance = Ohms 
+Units Temp = Deg C
+
+'Define Data Tables.
+DataTable (Test,1,-1) 'Set table size to # of records, or -1 to autoallocate.
+	DataInterval (0,15,Sec,10)
+	Minimum (1,Batt_volt,FP2,False,False)
+	Sample (1,PTemp,FP2)
+EndTable
+
+'Define Subroutines
+'Sub
+	'EnterSub instructions here
+'EndSub
+
+'Main Program
+BeginProg
+	Scan (1,Sec,0,0)
+		PanelTemp (PTemp,60)
+		Battery (Batt_volt)
+		
+		'Enter other measurement instructions
+		'Turn on the power to the sensor
+		SW12(1) 
+		
+		'Theta probe measurements (need to turn power on first)
+    VoltDiff(Theta_V,1,mv2500,1,True,0,_60Hz,.001,0)
+    
+    'Resistance ratio measurement using the half bridge command
+    BrHalf (V_ratio,1,mv2500,1,Vx1,1,2500,False,0,60, 1, 0)
+    
+    'Generalized Theta Probe VWC calculations for mineral soils (see Thetaprobe manual)
+    Theta_VWC = -0.071+(0.735*Theta_V)+(0.75*Theta_V^2)-(8.759*Theta_V^3)+(21.838*Theta_V^4)-(21.998*Theta_V^5)+(8.097*Theta_V^6)
+    
+		'Call Output Tables
+		'Example:
+		CallTable Test
+	NextScan
+EndProg
+

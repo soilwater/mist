@@ -10,5 +10,3 @@ This is a collaborative project among four U.S. institutions:
 - Tyson Ochsner and Jerry Brown (PhD student), Soil Physics, Department of Plant and Soil Sciences, Oklahoma State University
 
 The project is supported by the United State Department of Agriculture (USDA) Natural Resources Conservation Service (NRCS) through award #NR213A750025C007 and the USDA National Institute of Food and Agriculture (NIFA) through multi-state project W4188.
-
-

@@ -4,29 +4,12 @@
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
+    <!-- CustomCSS -->
+    <link rel="stylesheet" href="css/style.css">
+
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <style>
-        tr td {
-            min-width: 200px;
-            vertical-align: top;
-            padding-top: 10px;
-            padding-bottom: 0px;
-        }
-        tr ul {
-            margin-top:0px;
-            margin-bottom:0px;
-        }
-        tr p{
-            margin-top:0px;
-            margin-bottom:0px;
-        }
-        tr h6{
-            margin-top:0px;
-            margin-bottom:0px;
-        }
-    </style>
   </head>
 
   <body>
@@ -51,8 +34,8 @@
                 <!-- CS655 -->
                 <tr>
                     <td>
-                        <img class="materialboxed" width="128" src="img/sensor photos/CS655_reflectometer.JPG">
                         <h6><b>CS655</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/CS_655.jpg">
                     </td>
                     <td>
                         <ul>
@@ -60,17 +43,13 @@
                                 Soil water reflectometer manufactured by Campbell Scientific. Connects using SDI-12 protocol
                             </p>
                             <br/>
-                            <li><b>References</b></li>
-                            <li><a href="https://doi.org/10.2136/vzj2017.12.0214" target="_blank">Caldwell, et al., 2018.</a> </li>
-                            <li><a href="https://doi.org/10.1002/vzj2.20190" target="_blank">Patrignani et al., 2022</a></li>
-                            <br/>
                             <li><b>Programs</b></li>
-                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/CS655_code.CR300" target="_blank">CR300 datalogger</a></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/CS_655.CR300" target="_blank">CR300 datalogger</a></li>
                         </ul>
                     </td>
                     <td>
                         <ul>
-                            <li>Red -> Power (12 V+)</li>
+                            <li>Red -> Power (12V+)</li>
                             <li>Green -> Signal (C1)</li>
                             <li>Black -> Ground (G)</li>
                             <li>Orange -> Ground (G)</li>
@@ -78,15 +57,15 @@
                         </ul>
                     </td>
                     <td>
-                        <img class="materialboxed"  width="128" src="img/sensor photos/CS655_wiring.jpg">
+                        <img class="materialboxed"  width="128" src="img/sensor photos/CS_655_wiring.jpg">
                     </td>
                 </tr>
 
                 <!-- Theta Probe -->
                 <tr>
                     <td>
-                        <img class="materialboxed" width="128" src="img/sensor photos/ML3_Thetaprobe.JPG">
-                        <h6><b>ML3 Theta Probe</b></h6>
+                        <h6><b>Theta Probe</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/Theta_Probe.jpg">
                     </td>
                     <td>
                         <ul>
@@ -94,11 +73,8 @@
                                 Soil moisture sensor manufactured by DeltaT Devices. This sensors does not use the SDI-12 protocol
                             </p>
                             <br/>
-                            <li><b>References</b></li>
-                            <li><a href="https://doi.org/10.2136/vzj2012.0160" target="_blank">Vaz, et al., 2013.</a> </li>
-                            <br/>
                             <li><b>Programs</b></li>
-                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/ThetaProbe_code.CR300" target="_blank">CR300 datalogger</a></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/Theta_Probe.CR300" target="_blank">CR300 datalogger</a></li>
                         </ul>
                     </td>
                     <td>
@@ -112,9 +88,207 @@
                         </ul>
                     </td>
                     <td>
-                        <img class="materialboxed"  width="128" src="img/sensor photos/ML3_Thetaprobe_wiring.jpg">
+                        <img class="materialboxed"  width="128" src="img/sensor photos/Theta_Probe_wiring.jpg">
                     </td>
                 </tr>
+
+                <!-- Hydra Probe -->
+                <tr>
+                    <td>
+                        <h6><b>Hydra Probe</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/Hydra_Probe.jpg">
+                    </td>
+                    <td>
+                        <ul>
+                            <p>
+                                Soil moisture sensor manufactured by Stevens Water, Inc. This sensors connects using the SDI-12 protocol
+                            </p>
+                            <br/>
+                            <li><b>Programs</b></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/Theta_Probe.CR300" target="_blank">CR300 datalogger</a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Red -> Power (12V+)</li>
+                            <li>Blue -> Signal (C1)</li>
+                            <li>Black -> Ground (G))</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <img class="materialboxed"  width="128" src="img/sensor photos/Hydra_Probe_wiring.jpg">
+                    </td>
+                </tr>
+
+                <!-- Acclima TDR 315-N -->
+                <tr>
+                    <td>
+                        <h6><b>TDR 315N</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/TDR_315N.jpg">
+                    </td>
+                    <td>
+                        <ul>
+                            <p>
+                                Soil moisture sensor manufactured by Acclima, Inc. This sensors connects using the SDI-12 protocol
+                            </p>
+                            <br/>
+                            <li><b>Programs</b></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/TDR_315N.CR300" target="_blank">CR300 datalogger</a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Red -> Power (12V+)</li>
+                            <li>White -> Ground (G)</li>
+                            <li>Blue -> Signl (C2)</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <img class="materialboxed"  width="128" src="img/sensor photos/TDR_315N_wiring.jpg">
+                    </td>
+                </tr>
+
+                <!-- Teros 12 -->
+                <tr>
+                    <td>
+                        <h6><b>Teros 12</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/Teros_12.jpg">
+                    </td>
+                    <td>
+                        <ul>
+                            <p>
+                                Soil moisture sensor manufactured by Meter, Inc. This sensor connects using the SDI-12 protocol
+                            </p>
+                            <br/>
+                            <li><b>Programs</b></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/Teros_12.CR300" target="_blank">CR300 datalogger</a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Brown -> Power (12V+)</li>
+                            <li>Orange -> Signal (C1)</li>
+                            <li>Bare -> Ground (G)</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <img class="materialboxed"  width="128" src="img/sensor photos/Teros_12_wiring.jpg">
+                    </td>
+                </tr>
+
+                <!-- Teros 21 -->
+                <tr>
+                    <td>
+                        <h6><b>Teros 21</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/Teros_21.jpg">
+                    </td>
+                    <td>
+                        <ul>
+                            <p>
+                                Soil moisture sensor manufactured by Meter, Inc. This sensor measures matric potential and connects using the SDI-12 protocol
+                            </p>
+                            <br/>
+                            <li><b>Programs</b></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/Teros_21.CR300" target="_blank">CR300 datalogger</a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Brown -> Power (12V+)</li>
+                            <li>Orange -> Signal (C1)</li>
+                            <li>Bare -> Ground (G)</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <img class="materialboxed"  width="128" src="img/sensor photos/Teros_21_wiring.jpg">
+                    </td>
+                </tr>
+
+                <!-- Soil Vue -->
+                <tr>
+                    <td>
+                        <h6><b>Soil Vue</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/Soil_Vue.jpg">
+                    </td>
+                    <td>
+                        <ul>
+                            <p>
+                                Multi-depth soil moisture sensor manufactured by Campbell Scientific, Inc. This sensor measures volumetric water content and connects using the SDI-12 protocol
+                            </p>
+                            <br/>
+                            <li><b>Programs</b></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/Soil_Vue.CR300" target="_blank">CR300 datalogger</a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Brown -> Power (12V+)</li>
+                            <li>White -> Signal (C1)</li>
+                            <li>Clear -> Ground (G)</li>
+                            <li>Black -> Ground (G)</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <img class="materialboxed"  width="128" src="img/sensor photos/Soil_Vue_wiring.jpg">
+                    </td>
+                </tr>
+
+                <!-- Gro Point -->
+                <tr>
+                    <td>
+                        <h6><b>Gro Point</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/Gro_Point.jpg">
+                    </td>
+                    <td>
+                        <ul>
+                            <p>
+                                Multi-depth soil moisture sensor manufactured by Riot Technology, Inc. This sensor measures volumetric water content and connects using the SDI-12 protocol
+                            </p>
+                            <br/>
+                            <li><b>Programs</b></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/Gro_Point.CR300" target="_blank">CR300 datalogger</a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Red -> Power (12V+)</li>
+                            <li>White -> Signal (C1)</li>
+                            <li>Green -> Ground (G)</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <img class="materialboxed"  width="128" src="img/sensor photos/Gro_Point_wiring.jpg">
+                    </td>
+                </tr>
+
+                <!-- Drill and Drop -->
+                <tr>
+                    <td>
+                        <h6><b>Drill & Drop</b></h6>
+                        <img class="materialboxed" width="128" src="img/sensor photos/Drill_Drop.jpg">
+                    </td>
+                    <td>
+                        <ul>
+                            <p>
+                                Multi-depth soil moisture sensor manufactured by Sentek, Inc. This sensor measures volumetric water content and connects using the SDI-12 protocol
+                            </p>
+                            <br/>
+                            <li><b>Programs</b></li>
+                            <li><a href="https://github.com/soilwater/mist/blob/main/datalogger_programs/Dril_Drop.CR300" target="_blank">CR300 datalogger</a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Red -> Power (12V+)</li>
+                            <li>White -> Signal (C1)</li>
+                            <li>Green -> Ground (G)</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <img class="materialboxed"  width="128" src="img/sensor photos/Drill_Drop_wiring.jpg">
+                    </td>
+                </tr>
+
             </tbody>
         </table>
 

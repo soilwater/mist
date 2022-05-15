@@ -1,0 +1,145 @@
+'Title: Connecting SoilVue_10 to a CR300 datalogger
+'Date: May 10, 2022
+'Author: Nathaniel Parker and Andres Patrignani
+'Correspondence: andrespatrignani@ksu.edu; parkernath32@ksu.edu
+
+'Wiring:
+'Brown -> Power(12 V+ or SW12V)
+'White -> Signal (C1)
+'Clear -> Ground (G)
+'Black -> Ground (G)
+'Note: Make sure to connect a power source (battery) to the datalogger
+'Also, make sure to change the sensor address if necessary (this code uses "r" as the sensor address).
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public SoilVUE_5cm(4)
+Public SoilVUE_10cm(4)
+Public SoilVUE_20cm(4)
+Public SoilVUE_30cm(4)
+Public SoilVUE_40cm(4)
+Public SoilVUE_50cm(4)
+
+Alias SoilVUE_5cm(1)=VWC_5cm
+Alias SoilVUE_5cm(2)=Ka_5cm
+Alias SoilVUE_5cm(3)=T_5cm
+Alias SoilVUE_5cm(4)=BulkEC_5cm
+Alias SoilVUE_10cm(1)=VWC_10cm
+Alias SoilVUE_10cm(2)=Ka_10cm
+Alias SoilVUE_10cm(3)=T_10cm
+Alias SoilVUE_10cm(4)=BulkEC_10cm
+Alias SoilVUE_20cm(1)=VWC_20cm
+Alias SoilVUE_20cm(2)=Ka_20cm
+Alias SoilVUE_20cm(3)=T_20cm
+Alias SoilVUE_20cm(4)=BulkEC_20cm
+Alias SoilVUE_30cm(1)=VWC_30cm
+Alias SoilVUE_30cm(2)=Ka_30cm
+Alias SoilVUE_30cm(3)=T_30cm
+Alias SoilVUE_30cm(4)=BulkEC_30cm
+Alias SoilVUE_40cm(1)=VWC_40cm
+Alias SoilVUE_40cm(2)=Ka_40cm
+Alias SoilVUE_40cm(3)=T_40cm
+Alias SoilVUE_40cm(4)=BulkEC_40cm
+Alias SoilVUE_50cm(1)=VWC_50cm
+Alias SoilVUE_50cm(2)=Ka_50cm
+Alias SoilVUE_50cm(3)=T_50cm
+Alias SoilVUE_50cm(4)=BulkEC_50cm
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units VWC_5cm=m^3/m^3
+Units Ka_5cm=unitless
+Units T_5cm=Deg C
+Units BulkEC_5cm=dS/m
+Units VWC_10cm=m^3/m^3
+Units Ka_10cm=unitless
+Units T_10cm=Deg C
+Units BulkEC_10cm=dS/m
+Units VWC_20cm=m^3/m^3
+Units Ka_20cm=unitless
+Units T_20cm=Deg C
+Units BulkEC_20cm=dS/m
+Units VWC_30cm=m^3/m^3
+Units Ka_30cm=unitless
+Units T_30cm=Deg C
+Units BulkEC_30cm=dS/m
+Units VWC_40cm=m^3/m^3
+Units Ka_40cm=unitless
+Units T_40cm=Deg C
+Units BulkEC_40cm=dS/m
+Units VWC_50cm=m^3/m^3
+Units Ka_50cm=unitless
+Units T_50cm=Deg C
+Units BulkEC_50cm=dS/m
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,60,Sec,10)
+	Sample(1,BattV,FP2)
+	Sample(1,PTemp_C,FP2)
+	Average(1,VWC_5cm,FP2,False)
+	Average(1,Ka_5cm,FP2,False)
+	Average(1,T_5cm,FP2,False)
+	Average(1,BulkEC_5cm,FP2,False)
+	Average(1,VWC_10cm,FP2,False)
+	Average(1,Ka_10cm,FP2,False)
+	Average(1,T_10cm,FP2,False)
+	Average(1,BulkEC_10cm,FP2,False)
+	Average(1,VWC_20cm,FP2,False)
+	Average(1,Ka_20cm,FP2,False)
+	Average(1,T_20cm,FP2,False)
+	Average(1,BulkEC_20cm,FP2,False)
+	Average(1,VWC_30cm,FP2,False)
+	Average(1,Ka_30cm,FP2,False)
+	Average(1,T_30cm,FP2,False)
+	Average(1,BulkEC_30cm,FP2,False)
+	Average(1,VWC_40cm,FP2,False)
+	Average(1,Ka_40cm,FP2,False)
+	Average(1,T_40cm,FP2,False)
+	Average(1,BulkEC_40cm,FP2,False)
+	Average(1,VWC_50cm,FP2,False)
+	Average(1,Ka_50cm,FP2,False)
+	Average(1,T_50cm,FP2,False)
+	Average(1,BulkEC_50cm,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(10,Sec,1,0)
+		'Default CR300 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR300 Datalogger Processor Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'Measure the SoilVUE10 Complete Soil Profiler every hour
+		If TimeIntoInterval(0,10,Sec) Then
+			'Turn the SoilVUE10 Complete Soil Profiler on
+			SW12(1)
+			'Let the SoilVUE10 Complete Soil Profiler warm-up before taking measurements
+			Delay(0,2,Sec)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_5cm', 'Ka_5cm', 'T_5cm', and 'BulkEC_5cm'
+			SDI12Recorder(SoilVUE_5cm(),C1,"r","M1!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_10cm', 'Ka_10cm', 'T_10cm', and 'BulkEC_10cm'
+			SDI12Recorder(SoilVUE_10cm(),C1,"r","M2!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_20cm', 'Ka_20cm', 'T_20cm', and 'BulkEC_20cm'
+			SDI12Recorder(SoilVUE_20cm(),C1,"r","M3!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_30cm', 'Ka_30cm', 'T_30cm', and 'BulkEC_30cm'
+			SDI12Recorder(SoilVUE_30cm(),C1,"r","M4!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_40cm', 'Ka_40cm', 'T_40cm', and 'BulkEC_40cm'
+			SDI12Recorder(SoilVUE_40cm(),C1,"r","M5!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_50cm', 'Ka_50cm', 'T_50cm', and 'BulkEC_50cm'
+			SDI12Recorder(SoilVUE_50cm(),C1,"r","M6!",1,0,-1)
+			'Turn the SoilVUE10 Complete Soil Profiler off
+			SW12(0)
+		EndIf
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg

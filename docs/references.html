@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- CustomCSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  </head>
+
+  <body>
+
+    <div class="container">
+        <h2 style="font-weight:bold">
+            Annotated References
+        </h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Reference</th>
+                    <th>Sensors</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        RoTimi Ojo, E., Bullock, P. R., & Fitzmaurice, J. (2015). 
+                        Field performance of five soil moisture instruments in heavy clay soils. 
+                        Soil Science Society of America Journal, 79(1), 20-29.
+                        <a href="https://doi.org/10.2136/sssaj2014.06.0250">https://doi.org/10.2136/sssaj2014.06.0250</a>
+                    </td>
+                    <td>
+                        <p>Hydra-Probe, Theta-Probe, Diviner 2000, Enviroscan, ECH<sub>O</sub>EC-5</p>
+                        <div class="chip hydra-probe">Hydra probe</div>
+                        <div class="chip theta-probe">Theta probe</div>
+                        <div class="chip echo-ec5">ECHo EC-5 Probe</div>
+                        <div class="chip diviner">Diviner 2000</div>
+                        <div class="chip enviroscan">Enviroscan</div>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Logsdon, S. D., Green, T. R., Seyfried, M., Evett, S. R., & Bonta, J. (2010). 
+                        Hydra probe and twelve‐wire probe comparisons in fluids and soil cores. 
+                        Soil Science Society of America Journal, 74(1), 5-12.
+                        <a href=" https://doi.org/10.2136/sssaj2009.0189">https://doi.org/10.2136/sssaj2009.0189</a>
+                    </td>
+                    <td>
+                        <div class="chip hydra-probe">Hydra Probe</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        RoTimi Ojo, E., Bullock, P. R., & Fitzmaurice, J. (2015). 
+                        Field performance of five soil moisture instruments in heavy clay soils. 
+                        Soil Science Society of America Journal, 79(1), 20-29.
+                        <a href="https://doi.org/10.2136/sssaj2014.06.0250">https://doi.org/10.2136/sssaj2014.06.0250</a>
+                    </td>
+                    <td>
+                        <div class="chip hydra-probe">Hydra Probe</div>
+                    </td>
+                </tr>
+
+
+            </tbody>
+        </table>
+        <p>
+
+        </p>
+
+    </div>
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.chips');
+            var instances = M.Chips.init(elems);
+        });
+    </script>
+            
+  </body>
+</html>

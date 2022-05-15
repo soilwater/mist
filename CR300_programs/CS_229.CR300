@@ -1,0 +1,105 @@
+'Title: Connecting CS229L sensor to a CR300 datalogger
+'Date: April 11, 2022
+'Author: Nathaniel Parker and Andres Patrignani
+'Correspondence: parkernath32@ksu.edu; andrespatrignani@ksu.edu
+
+'Wiring:
+'Clear cable -> Ground (G)
+'Blue -> High channel (H1)
+'Red - > Low channel (L1)
+'Green -> High channel (H2)
+'Black -> Low channel (L2)
+'Note: Make sure to connect a power source (battery) to the datalogger
+
+'Matric potential measurement using this type of sensor require correcting the temperature readings
+'using some experimentally-derived calibration constants, including Delta_Tdry, Delta_Twet, "a", "c", and Caltemp.
+'During sensor calibration, determine for each sensor Delta_Tdry when sensor is completely dry, Delta_Twet when sensor is
+'fully saturated, and calibration temperature of the sensor(Caltemp). Also, determine  constants, "a", "c".
+
+'In this code, I tentatively used Delta_Tdry, Delta_Twet, and Caltemp values from the user manual and "a" and "c" from 
+'the Oklahoma Mesonet soil database (Scott et al. 2013). To ensure accuracy, determine the values for your soil.
+Const c = 0.717 'kPa
+Const a = 1.7880 'Deg C^-1
+Dim Tnormcorr
+Dim s
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C 
+Public Caltemp = 20
+Public Delta_Tdry = 2.421 
+Public Delta_Twet = 0.00152 
+Public StartTemp
+Public Temp_1sec
+Public Temp_30sec
+Public Delta_T
+Public Tnorm
+Public Delta_Tcorr
+Public Matric_P
+
+Units BattV = Volts
+Units PTemp_C = Deg c
+Units Caltemp = Deg c
+Units Delta_Tdry = Deg c
+Units Delta_Twet = Deg c
+Units StartTemp = Deg c
+Units Temp_1sec = Deg c
+Units Temp_30sec = Deg c
+Units Delta_T = Deg c 
+Units Delta_Tcorr = Deg c
+Units Matric_P = kPa
+
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,60,Sec,10)
+	Average(1,StartTemp,FP2,False)
+	Average(1,Temp_1sec,FP2,False)
+	Average(1,Temp_30sec,FP2,False)
+	Average(1,Delta_T,FP2,False)
+	Average(1,Delta_Tcorr,FP2,False)
+	Average(1,Matric_P,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,3600,Sec,60)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Subroutine to correct temperature rise Delta_T
+Sub TempCorr 
+  Tnorm = (Delta_Tdry - Delta_T)/(Delta_Tdry - Delta_Twet)
+  s = (-0.0133*Tnorm^5) + (0.0559*Tnorm^4) - (0.0747*Tnorm^3) + (0.0203*Tnorm^2) + (0.011*Tnorm) + 0.0013
+  Tnormcorr = Tnorm - s*(StartTemp - Caltemp)
+  Delta_Tcorr = Delta_Tdry - Tnormcorr*(Delta_Tdry - Delta_Twet)
+EndSub
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(60,Sec,1,0)
+		'Default CR300 Datalogger Battery Voltage 'BattV' and Processor Temperature 'PTemp_C'
+		Battery(BattV)
+		PanelTemp(PTemp_C,60)
+		
+		' Temperature measurements from thermocouple using PTemp_C as the refrence tempereature
+		TCDiff(StartTemp,1,mv34,1,TypeT,PTemp_C,True,0,60,1,0) 'starting temperature before heating
+		Delay (0,1,Sec) 'Wait 1 second
+    TCDiff(Temp_1sec,1,mv34,1,TypeT,PTemp_C,True,0,60,1,0) 'temperature after 1 second of heating
+    Delay (0,29,Sec) 'Wait 29 seconds more
+    TCDiff(Temp_30sec,1,mv34,1,TypeT,PTemp_C,True,0,60,1,0)'temperature after 30 second of heating
+    
+    'Calculate temperature rise    
+    Delta_T = Temp_30sec - Temp_1sec
+        
+    Call TempCorr 'Call temperature correction subroutine
+    
+    'Calculate matric potential
+    Matric_P = -c *EXP(a *Delta_Tcorr)
+    
+        
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg

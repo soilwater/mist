@@ -1,0 +1,118 @@
+'Title: Connecting Sentek drill and drop sensor to a CR300 datalogger
+'Date: April 11, 2022
+'Authors: Nathaniel Parker and Andres Patrignani
+'Correspondence: parkernath32@ksu.edu; andrespatrignani@ksu.edu
+
+'Wiring:
+'Red -> Power (12V+)
+'White -> Signal (C1)
+'Green -> Ground (G)
+'Note: Make sure to connect a power source (battery) to the datalogger
+'Also, make sure to change the sensor address if necessary (this code uses "n" as the sensor address).
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public Drilldrop(6)
+Public Drilldrop_2(6)
+Public Drilldrop_3(6)
+
+Alias Drilldrop(1)=VWC_1
+Alias Drilldrop(2)=VWC_2
+Alias Drilldrop(3)=VWC_3
+Alias Drilldrop(4)=VWC_4
+Alias Drilldrop(5)=VWC_5
+Alias Drilldrop(6)=VWC_6
+Alias Drilldrop_2(1)=Salinity_1
+Alias Drilldrop_2(2)=Salinity_2
+Alias Drilldrop_2(3)=Salinity_3
+Alias Drilldrop_2(4)=Salinity_4
+Alias Drilldrop_2(5)=Salinity_5
+Alias Drilldrop_2(6)=Salinity_6
+Alias Drilldrop_3(1)=Temp_1
+Alias Drilldrop_3(2)=Temp_2
+Alias Drilldrop_3(3)=Temp_3
+Alias Drilldrop_3(4)=Temp_4
+Alias Drilldrop_3(5)=Temp_5
+Alias Drilldrop_3(6)=Temp_6
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units VWC_1=%
+Units VWC_2=%
+Units VWC_3=%
+Units VWC_4=%
+Units VWC_5=%
+Units VWC_6=%
+Units Salinity_1=VIC 'VIC means Volumetric Ion Content.'Requires site-specific calibration to convert VIC to EC
+Units Salinity_2=VIC
+Units Salinity_3=VIC
+Units Salinity_4=VIC
+Units Salinity_5=VIC
+Units Salinity_6=VIC
+Units Temp_1=Deg C
+Units Temp_2=Deg C
+Units Temp_3=Deg C
+Units Temp_4=Deg C
+Units Temp_5=Deg C
+Units Temp_6=Deg C
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,60,Sec,10)
+	Average(1,BattV,FP2,False)
+	Average(1,PTemp_C,FP2,False)
+	Average(1,VWC_1,FP2,False)
+	Average(1,VWC_2,FP2,False)
+	Average(1,VWC_3,FP2,False)
+	Average(1,VWC_4,FP2,False)
+	Average(1,VWC_5,FP2,False)
+	Average(1,VWC_6,FP2,False)
+	Average(1,Salinity_1,FP2,False)
+	Average(1,Salinity_2,FP2,False)
+	Average(1,Salinity_3,FP2,False)
+	Average(1,Salinity_4,FP2,False)
+	Average(1,Salinity_5,FP2,False)
+	Average(1,Salinity_6,FP2,False)
+	Average(1,Temp_1,FP2,False)
+	Average(1,Temp_2,FP2,False)
+	Average(1,Temp_3,FP2,False)
+	Average(1,Temp_4,FP2,False)
+	Average(1,Temp_5,FP2,False)
+	Average(1,Temp_6,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(10,Sec,1,0)
+		'Default CR300 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR300 Datalogger Processor Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		
+		'Read soil moisture measurements
+		SDI12Recorder(Drilldrop(),C1,"n","M!",1,0,-1)
+		'Reset all Drilldrop Sensor measurements if NAN is returned to Drilldrop(1)
+		If Drilldrop(1)=NAN Then Move(Drilldrop(),6,NAN,1)
+		
+		'Read soil salinity measurements
+		SDI12Recorder(Drilldrop_2(),C1,"n","M2!",1,0,-1)
+		'Reset all Drilldrop Sensor measurements if NAN is returned to Drilldrop_2(1)
+		If Drilldrop_2(1)=NAN Then Move(Drilldrop_2(),6,NAN,1)
+		
+		'Read soil temperature measurements
+		SDI12Recorder(Drilldrop_3(),C1,"n","M4!",1,0,-1)
+		'Reset all Drilldrop Sensor measurements if NAN is returned to Drilldrop_3(1)
+		If Drilldrop_3(1)=NAN Then Move(Drilldrop_3(),6,NAN,1)
+		
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg

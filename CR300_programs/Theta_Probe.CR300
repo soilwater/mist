@@ -1,0 +1,79 @@
+'Title: Connecting ML3 Thetaprobe to a CR300 datalogger
+'Date: 25 March 2022
+'Program author: Nathaniel Parker, Lynn Mckee, and Andres Patrignani
+'Correspondence: parkernath32@ksu.edu; andrespatrignani@ksu.edu
+
+'Wiring:
+'Green -> Earth ground (located on the immediate left of the H-L channels)
+'Brown -> Ground (G)
+'White -> Power (SW12V)
+'Blue -> High channel (H1)
+'Black -> Low channel (L1)
+'Gray -> High channel (H2)
+'Connect one resistor (5.8 - 28 kiloohms resistance) from SE3 (same location as H2 for the gray cable)
+'to VX1 (or VX2) channels
+'Note: Make sure to connect a power source (battery) to the datalogger
+
+'Declare Public Variables and units
+Public PTemp, Batt_volt  
+Public Volt_dif 
+Public Theta_VWC 
+Public Res 
+Public Temp 
+Dim ML3_mv 
+Dim ln_Res
+
+Units Volt_dif = Volt
+Units Theta_VWC = cm^3 / cm^3
+Units Res = ohms 
+Units Temp = Deg C
+
+
+'Define Data Tables.
+DataTable (Table2,1,-1) 'Set table size to # of records, or -1 to autoallocate.
+	DataInterval (0,60,Sec,10)
+	Minimum (1,Batt_volt,FP2,False,False)
+	Sample (1,PTemp,FP2)
+EndTable
+
+DataTable (Table1,1,-1) 
+	DataInterval (0,3600,Sec,10)
+	Average (1,Volt_dif,FP2,False)
+	Average (1,Theta_VWC,FP2,False)
+	Average (1,Res,FP2,False)
+	Average (1,Temp,FP2,False)
+EndTable
+
+
+'Main Program
+BeginProg
+	Scan (10,Sec,0,0)
+		PanelTemp (PTemp,60)
+		Battery (Batt_volt)
+		
+		'Turn on the power to the sensor
+		SW12(1)
+		Delay(0,750,mSec) 
+		
+		'Theta probe differential voltage measurements
+    VoltDiff(Volt_dif,1,mv2500,1,False,0,_60Hz,.001,0)
+    'VWC calculations for mineral soils from manual
+    Theta_VWC = -0.071+(0.735*Volt_dif)+(0.75*Volt_dif^2)-(8.759*Volt_dif^3)+(21.838*Volt_dif^4)-(21.998*Volt_dif^5)+(8.097*Volt_dif^6)
+    SW12(0) 'Turn power off
+    
+    'Resistance measurement accross the excitation channels using the half bridge command
+    BrHalf (ML3_mv,1,mv2500,3,Vx2,1,2500,True,0,_60Hz,1,0)
+    'Convert mV to resistance
+    Res = 10000*ML3_mv/(1-ML3_mv)
+    'Calculate the natural log of the resistance:
+     ln_Res = LOG(Res)
+
+    'convert resistance to temperature 
+    Temp = 1/( (7.8480463e-4) + (2.6905669e-4)*ln_Res + (1.1660856e-7)*(ln_Res^3)) - 273.15
+    
+		'Call Output Tables
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg
+

@@ -1,0 +1,59 @@
+'Title: Connecting Acclima TDR-315N to a CR300 datalogger
+'Date: April 11, 2022
+'Authors: Nathaniel Parker and Andres Patrignani
+'Correspondence: parkernath32@ksu.edu; andrespatrignani@ksu.edu
+
+'Wiring:
+'Red -> Power (12V+)
+'White -> Ground (G)
+'Blue -> Signal (C1)
+'Note: Make sure to connect a power source (battery) to the datalogger
+'Also, make sure to change the sensor address if necessary (this code uses "0" as the sensor address).
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public Acclima(4)
+
+Alias Acclima(1)=VWC
+Alias Acclima(2)=Temp
+Alias Acclima(3)=Perm
+Alias Acclima(4)=EC
+
+Units BattV = Volts
+Units PTemp_C = Deg C
+Units VWC= %
+Units Temp = Deg C
+Units Perm = unitless
+Units EC = microS/cm
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,1,Hr,10)
+	Average(1,VWC,FP2,False)
+	Average(1,Temp,FP2,False)
+	Average(1,Perm,FP2,False)
+	Average(1,EC,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(10,Sec,1,0)
+		'Default CR300 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR300 Datalogger Processor Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		SDI12Recorder(Acclima(),C1,"0","M!",1,0,-1)
+		'Reset all Acclima Sensor measurements if NAN is returned to Acclima(1)
+		If Acclima(1)=NAN Then Move(Acclima(),4,NAN,1)
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg

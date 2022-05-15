@@ -1,0 +1,80 @@
+'Title: Connecting GroPoint to CR300 datalogger
+'Date: April 10, 2022
+'Authors: Nathaniel Parker and Andres Patrignani
+'Correspondence: parkernath32@ksu.edu; andrespatrignani@ksu.edu
+
+'Wiring:
+'Red -> Power (12V+)
+'White -> Signal (C1)
+'Green -> Ground (G)
+'Note: Make sure to connect a power source (battery) to the datalogger
+'Also, make sure to change the sensor address if necessary (this code uses "m" as the sensor address).
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public GroPoint(6)
+Public GroPoint_2(3)
+
+Alias GroPoint(1)=Temp_1
+Alias GroPoint(2)=Temp_2
+Alias GroPoint(3)=Temp_3
+Alias GroPoint(4)=Temp_4
+Alias GroPoint(5)=Temp_5
+Alias GroPoint(6)=Temp_6
+Alias GroPoint_2(1)=VWC_1
+Alias GroPoint_2(2)=VWC_2
+Alias GroPoint_2(3)=VWC_3
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units Temp_1=Deg C
+Units Temp_2=Deg C
+Units Temp_3=Deg C
+Units Temp_4=Deg C
+Units Temp_5=Deg C
+Units Temp_6=Deg C
+Units VWC_1=%
+Units VWC_2=%
+Units VWC_3=%
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,30,Sec,10)
+	Average(1,BattV,FP2,False)
+	Average(1,PTemp_C,FP2,False)
+	Average(1,Temp_1,FP2,False)
+	Average(1,Temp_2,FP2,False)
+	Average(1,Temp_3,FP2,False)
+	Average(1,Temp_4,FP2,False)
+	Average(1,Temp_5,FP2,False)
+	Average(1,Temp_6,FP2,False)
+	Average(1,VWC_1,FP2,False)
+	Average(1,VWC_2,FP2,False)
+	Average(1,VWC_3,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(10,Sec,1,0)
+		'Default CR300 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR300 Datalogger Processor Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		SDI12Recorder(GroPoint(),C1,"m","M1!",1,0,-1)
+		'Reset all GroPoint Sensor measurements if NAN is returned to GroPoint(1)
+		If GroPoint(1)=NAN Then Move(GroPoint(),6,NAN,1)
+		SDI12Recorder(GroPoint_2(),C1,"m","M!",1,0,-1)
+		'Reset all GroPoint Sensor measurements if NAN is returned to GroPoint_2(1)
+		If GroPoint_2(1)=NAN Then Move(GroPoint_2(),3,NAN,1)
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg

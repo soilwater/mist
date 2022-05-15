@@ -1,0 +1,20 @@
+tr td {
+    min-width: 200px;
+    vertical-align: top;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+tr ul {
+    margin-top:0px;
+    margin-bottom:0px;
+}
+
+tr p{
+    margin-top:0px;
+    margin-bottom:0px;
+}
+
+tr h6{
+    margin-top:0px;
+    margin-bottom:0px;
+}

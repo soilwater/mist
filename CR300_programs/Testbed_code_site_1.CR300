@@ -1,0 +1,888 @@
+'A CR300 datalogger code for operating sensors in the Multistate Soil Moisture Sensor Testbed (MIST)
+'Date: April 15, 2022
+'Author: Nathaniel Parker, Lyn Mckee, and Andres Patrignani
+
+'### Station information ###
+Public station As String = "Site 1"
+Public latitude = 39.10236
+Public longitude = -96.60097
+Public altitude As Long = 335
+Units station = name
+Units latitude = decdegrees
+Units longitude = decdegrees
+Units altitude = m
+
+
+
+'Define data storage time in Data Tables
+Const time_to_interval = 0 
+Const interval = 60
+Const lapses = 10
+
+
+
+'Declare variables and Units
+
+'### BATTERY VOLTAGE AND PANEL TEMPERATURE ###
+
+'Battery voltage
+Public Batt
+Units Batt = Volt
+
+'Panel temperature
+Public PTemp
+Units PTemp = Deg C
+
+
+
+'### TE525MM RAIN GAUGE ###
+
+'Wiring:
+'Black -> Pulse channel (P_SW)
+'Clear -> Ground (G)
+'White -> Ground (G)
+
+Public TE525MM_Rain
+Units TE525MM_Rain = mm
+
+
+
+'### CS655 ###
+
+'Wiring:
+'Red -> Power (12 V+)
+'Green -> Signal (C1)
+'Black -> Ground (G)
+'Orange -> Ground (G)
+'Clear -> Ground (G)
+
+'CS655 at 5 cm depth
+Public CS655_5(6)
+Alias CS655_5(1) = CS655_VWC_5
+Alias CS655_5(2) = CS655_EC_5 
+Alias CS655_5(3) = CS655_Temp_5 
+Alias CS655_5(4) = CS655_Perm_5 
+Alias CS655_5(5) = CS655_PA_5
+Alias CS655_5(6) = CS655_VR_5 
+Units CS655_VWC_5 = m^3/m^3
+Units CS655_EC_5 = dS/m
+Units CS655_Temp_5 = Deg c
+Units CS655_Perm_5 = unitless
+Units CS655_PA_5 = nSec
+Units CS655_VR_5 = unitless
+
+'CS655 at 20 cm depth
+Public CS655_20(6)
+Alias CS655_20(1) = CS655_VWC_20 
+Alias CS655_20(2) = CS655_EC_20  
+Alias CS655_20(3) = CS655_Temp_20  
+Alias CS655_20(4) = CS655_Perm_20 
+Alias CS655_20(5) = CS655_PA_20 
+Alias CS655_20(6)= CS655_VR_20
+Units CS655_VWC_20 = m^3/m^3
+Units CS655_EC_20 = dS/m
+Units CS655_Temp_20 = Deg C
+Units CS655_Perm_20 = unitless
+Units CS655_PA_20= nSec
+Units CS655_VR_20 = unitless
+
+'CS655 at 40 cm depth
+Public CS655_40(6) 
+Alias CS655_40(1)= CS655_VWC_40 
+Alias CS655_40(2)= CS655_EC_40 
+Alias CS655_40(3)= CS655_Temp_40 
+Alias CS655_40(4)= CS655_Perm_40 
+Alias CS655_40(5)= CS655_PA_40 
+Alias CS655_40(6)= CS655_VR_40 
+Units CS655_VWC_40 = m^3/m^3
+Units CS655_EC_40 = dS/m
+Units CS655_Temp_40 = Deg c
+Units CS655_Perm_40 = unitless
+Units CS655_PA_40 = nSec
+Units CS655_VR_40 = unitless
+
+
+
+'### ACCLIMA TDR315N ###
+
+'Wiring:
+'Red -> Power (12V+)
+'White -> Ground (G)
+'Blue -> Signal (C1)
+
+'TDR315N at 5 cm depth
+Public Acclima_5(4)
+Alias Acclima_5(1) = Acclima_VWC_5 
+Alias Acclima_5(2) = Acclima_Temp_5 
+Alias Acclima_5(3)= Acclima_Perm_5 
+Alias Acclima_5(4)= Acclima_EC_5 
+Units Acclima_VWC_5 = %
+Units Acclima_EC_5 = microS/cm
+Units Acclima_Temp_5 = Deg c
+Units Acclima_Perm_5 = unitless
+
+'TDR315N at 20 cm depth
+Public Acclima_20(4)
+Alias Acclima_20(1)= Acclima_VWC_20 
+Alias Acclima_20(2)= Acclima_Temp_20 
+Alias Acclima_20(3)= Acclima_Perm_20 
+Alias Acclima_20(4)= Acclima_EC_20 
+Units Acclima_VWC_20 = %
+Units Acclima_EC_20 = microS/cm
+Units Acclima_Perm_20 = unitless
+Units Acclima_Temp_20 = Deg c
+
+'TDR315N at 40 cm depth
+Public Acclima_40(4)
+Alias Acclima_40(1)= Acclima_VWC_40 
+Alias Acclima_40(2)= Acclima_Temp_40 
+Alias Acclima_40(3)= Acclima_Perm_40 
+Alias Acclima_40(4)= Acclima_EC_40 
+Units Acclima_VWC_40  = %
+Units Acclima_EC_40 = microS/cm
+Units Acclima_Temp_40 = Deg c
+Units Acclima_Perm_40 = unitless
+
+
+
+'### ML3 THETAPROBE ###
+
+'Wiring:
+'Green -> Earth ground (located on the immediate left of the H-L channels)
+'Brown -> Ground (G)
+'White -> Power (SW12V)
+'Blue -> High channel (H1)
+'Black -> Low channel (L1)
+'Gray -> High channel (H2)
+'Note: To include temperature readings, connect one resistor (5.8 - 28 kiloohms resistance) from 
+'SE3 (same location as H2 for the gray cable) to VX1 (or VX2) channels.
+'Note: We did not include soil temperature readings due to inadequate VX1(or VX2) ports on the logger for resistors
+
+'Thetaprobe at 5 cm depth
+Public Thetaprobe_V_5 'Voltage from Theta Probes
+Public Thetaprobe_VWC_5 'VWC from Theta Probes
+Units Thetaprobe_V_5 = Volts
+Units Thetaprobe_VWC_5 = m^3 / m^3
+
+'Thetaprobe at 20 cm depth
+Public Thetaprobe_V_20 
+Public Thetaprobe_VWC_20 
+Units Thetaprobe_V_20 = Volts
+Units Thetaprobe_VWC_20 = m^3 / m^3
+
+'Thetaprobe at 40 cm depth
+Public Thetaprobe_V_40 
+Public Thetaprobe_VWC_40
+Units Thetaprobe_V_40 = Volts
+Units Thetaprobe_VWC_40 = m^3 / m^3
+
+
+
+'### TEROS 12 ###
+
+'Wiring:
+'Brown -> Power (12 V+)
+'Orange -> Signal (C1)
+'Bare -> Ground (G)
+
+'Teros 12 at 5 cm depth
+Public Teros12_5(3)
+Public Teros12_VWC_5
+Public Teros12_Perm_5
+Alias Teros12_5(1) = Teros12_RAW_5 
+Alias Teros12_5(2) = Teros12_Temp_5 
+Alias Teros12_5(3)= Teros12_EC_5
+Units Teros12_VWC_5 = m^3/m^3
+Units Teros12_Perm_5 = unitless
+Units Teros12_RAW_5 = unitless
+Units Teros12_Temp_5 = Deg c
+Units Teros12_EC_5 = dS/m
+
+'Teros 12 at 20 cm depth
+Public Teros12_20(3)
+Public Teros12_VWC_20
+Public Teros12_Perm_20
+Alias Teros12_20(1) = Teros12_RAW_20 
+Alias Teros12_20(2)= Teros12_Temp_20 
+Alias Teros12_20(3)= Teros12_EC_20 
+Units Teros12_VWC_20 = m^3/m^3
+Units Teros12_Perm_20 = unitless
+Units Teros12_RAW_20 = unitless
+Units Teros12_Temp_20 = Deg c
+Units Teros12_EC_20 = dS/m
+
+'Teros 12 at 40 cm depth
+Public Teros12_40(3)
+Public Teros12_VWC_40
+Public Teros12_Perm_40
+Alias Teros12_40(1) = Teros12_RAW_40 
+Alias Teros12_40(2) = Teros12_Temp_40 
+Alias Teros12_40(3) = Teros12_EC_40 
+Units Teros12_VWC_40 = m^3/m^3
+Units Teros12_Perm_40 = unitless
+Units Teros12_RAW_40 = unitless
+Units Teros12_Temp_40 = Deg c
+Units Teros12_EC_40 = dS/m
+
+
+
+'### TEROS 21 ### 
+
+'Wiring:
+'Brown -> Power (12 V+)
+'Orange -> Signal (C1)
+'Bare -> Ground (G)
+
+'Teros 21 at 5 cm depth
+Public Teros21_5(2)
+Alias Teros21_5(1) = Teros21_Matric_P_5 
+Alias Teros21_5(2) = Teros21_Temp_5 
+Units Teros21_Matric_P_5 = kPa
+Units Teros21_Temp_5 = Deg c
+
+'Teros 21 at 20 cm depth
+Public Teros21_20(2)
+Alias Teros21_20(1) = Teros21_Matric_P_20 
+Alias Teros21_20(2) = Teros21_Temp_20 
+Units Teros21_Matric_P_20 = kPa
+Units Teros21_Temp_20 = Deg c
+
+'Teros 21 at 40 cm depth
+Public Teros21_40(2)
+Alias Teros21_40(1) = Teros21_Matric_P_40 
+Alias Teros21_40(2) = Teros21_Temp_40 
+Units Teros21_Matric_P_40 = kPa
+Units Teros21_Temp_40 = Deg c
+
+
+
+'### HYDRAPROBE ###
+
+'Wiring:
+'Red -> Power (12 V+)
+'Blue -> Signal (C1)
+'Black -> Ground (G)
+
+'Hydraprobe at 5 cm depth
+Public Hydraprobe_5(7)
+Alias Hydraprobe_5(1) = Hydraprobe_VWC_5
+Alias Hydraprobe_5(2) = Hydraprobe_EC_5_cor 'corrected with temperature
+Alias Hydraprobe_5(3) = Hydraprobe_Temp_5_Deg_C
+Alias Hydraprobe_5(4) = Hydraprobe_Temp_5_Deg_F
+Alias Hydraprobe_5(5) = Hydraprobe_EC_5_uncor
+Alias Hydraprobe_5(6) = Hydraprobe_Perm_real_5
+Units Hydraprobe_VWC_5 = m^3 /m^3
+Units Hydraprobe_EC_5_cor = s/m
+Units Hydraprobe_Temp_5_Deg_C = Deg c
+Units Hydraprobe_Temp_5_Deg_F = Deg F
+Units Hydraprobe_EC_5_uncor = s/m
+Units Hydraprobe_Perm_real_5 = unitless
+Units Hydraprobe_Perm_imaginary_5 = unitless
+
+'Hydraprobe at 20 cm depth
+Public Hydraprobe_20(7)
+Alias Hydraprobe_5(7) = Hydraprobe_Perm_imaginary_5
+Alias Hydraprobe_20(1) = Hydraprobe_VWC_20
+Alias Hydraprobe_20(2) = Hydraprobe_EC_20_cor 'corrected with temperature
+Alias Hydraprobe_20(3) = Hydraprobe_Temp_20_Deg_C
+Alias Hydraprobe_20(4) = Hydraprobe_Temp_20_Deg_F
+Alias Hydraprobe_20(5) = Hydraprobe_EC_20_uncor
+Alias Hydraprobe_20(6) = Hydraprobe_Perm_real_20
+Alias Hydraprobe_20(7) = Hydraprobe_Perm_imaginary_20
+Units Hydraprobe_VWC_20 = m^3 /m^3
+Units Hydraprobe_EC_20_cor = s/m
+Units Hydraprobe_Temp_20_Deg_C = Deg c
+Units Hydraprobe_Temp_20_Deg_F = Deg F
+Units Hydraprobe_EC_20_uncor = s/m
+Units Hydraprobe_Perm_real_20 = unitless
+Units Hydraprobe_Perm_imaginary_20 = unitless
+
+'Hydraprobe at 40 cm depth
+Public Hydraprobe_40(7)
+Alias Hydraprobe_40(1) = Hydraprobe_VWC_40
+Alias Hydraprobe_40(2) = Hydraprobe_EC_40_cor 'corrected with temperature
+Alias Hydraprobe_40(3) = Hydraprobe_Temp_40_Deg_C
+Alias Hydraprobe_40(4) = Hydraprobe_Temp_40_Deg_F
+Alias Hydraprobe_40(5) = Hydraprobe_EC_40_uncor
+Alias Hydraprobe_40(6) = Hydraprobe_Perm_real_40
+Alias Hydraprobe_40(7) = Hydraprobe_Perm_imaginary_40
+Units Hydraprobe_VWC_40 = m^3 /m^3
+Units Hydraprobe_EC_40_cor = s/m
+Units Hydraprobe_Temp_40_Deg_C = Deg c
+Units Hydraprobe_Temp_40_Deg_F = Deg F
+Units Hydraprobe_EC_40_uncor = s/m
+Units Hydraprobe_Perm_real_40 = unitless
+Units Hydraprobe_Perm_imaginary_40 = unitless
+
+
+
+'### GROPOINT ###
+
+'Wiring:
+'Red -> Power (12V+)
+'White -> Signal (C1)
+'Green -> Ground (G)
+
+'Gropoint profile moisture 
+Public GroPoint_moisture(3)
+Alias GroPoint_moisture(1) = GroPoint_VWC_0_15 
+Alias GroPoint_moisture(2)= GroPoint_VWC_15_30 
+Alias GroPoint_moisture(3) = GroPoint_VWC_30_45
+Units GroPoint_VWC_0_15 = %
+Units GroPoint_VWC_15_30 = %
+Units GroPoint_VWC_30_45 = %
+
+'Gropoint profile temperature
+Public GroPoint_temperature(6)
+Alias GroPoint_temperature(1)= GroPoint_Temp_3 
+Alias GroPoint_temperature(2)= GroPoint_Temp_10 
+Alias GroPoint_temperature(3)= GroPoint_Temp_20 
+Alias GroPoint_temperature(4)= GroPoint_Temp_30 
+Alias GroPoint_temperature(5) = GroPoint_Temp_40 
+Alias GroPoint_temperature(6) = GroPoint_Temp_45 
+Units GroPoint_Temp_3 = Deg c
+Units GroPoint_Temp_10 = Deg c
+Units GroPoint_Temp_20 = Deg c
+Units GroPoint_Temp_30 = Deg c
+Units GroPoint_Temp_40 = Deg c
+Units GroPoint_Temp_45 = Deg c
+
+
+
+'### DRILL AND DROP ###
+
+'Wiring:
+'Red -> Power (12V+)
+'White -> Signal (C1)
+'Green -> Ground (G)
+
+'Drill and drop profile moisture
+Public Drilldrop_moisture(6)
+Alias Drilldrop_moisture(1) = DrillDrop_VWC_5
+Alias Drilldrop_moisture(2) = DrillDrop_VWC_15 
+Alias Drilldrop_moisture(3) = DrillDrop_VWC_25 
+Alias Drilldrop_moisture(4) = DrillDrop_VWC_35 
+Alias Drilldrop_moisture(5) = DrillDrop_VWC_45 
+Alias Drilldrop_moisture(6) = DrillDrop_VWC_55  
+Units DrillDrop_VWC_5 = %
+Units DrillDrop_VWC_15 = %
+Units DrillDrop_VWC_25 = %
+Units DrillDrop_VWC_35 = %
+Units DrillDrop_VWC_45 = %
+Units DrillDrop_VWC_55 = %
+
+'Drill and drop profile salinity
+Public Drilldrop_salinity(6)
+Alias Drilldrop_salinity(1) = DrillDrop_sal_5 
+Alias Drilldrop_salinity(2) = DrillDrop_sal_15 
+Alias Drilldrop_salinity(3) = DrillDrop_sal_25 
+Alias Drilldrop_salinity(4) = DrillDrop_sal_35 
+Alias Drilldrop_salinity(5) = DrillDrop_sal_45 
+Alias Drilldrop_salinity(6) = DrillDrop_sal_55
+Units DrillDrop_sal_5 = VIC 'VIC means Volumetric Ion Content.'Requires site-specific calibration to convert VIC to EC
+Units DrillDrop_sal_15 = VIC
+Units DrillDrop_sal_25 = VIC
+Units DrillDrop_sal_35 = VIC
+Units DrillDrop_sal_45 = VIC
+Units DrillDrop_sal_55 = VIC
+
+'Drill and drop profile temperature
+Public Drilldrop_temperature(6)
+Alias Drilldrop_temperature(1) = DrillDrop_Temp_5 
+Alias Drilldrop_temperature(2) = DrillDrop_Temp_15 
+Alias Drilldrop_temperature(3) = DrillDrop_Temp_25 
+Alias Drilldrop_temperature(4) = DrillDrop_Temp_35 
+Alias Drilldrop_temperature(5) = DrillDrop_Temp_45 
+Alias Drilldrop_temperature(6) = DrillDrop_Temp_55 
+Units DrillDrop_Temp_5 = Deg c
+Units DrillDrop_Temp_15 = Deg c
+Units DrillDrop_Temp_25 = Deg c
+Units DrillDrop_Temp_35 = Deg c
+Units DrillDrop_Temp_45 = Deg c
+Units DrillDrop_Temp_55 = Deg c
+
+
+
+'### SOILVUE 10 ###
+
+'Wiring:
+'Brown -> Power(12 V+ or SW12V)
+'White -> Signal (C1)
+'Clear -> Ground (G)
+'Black -> Ground (G)
+
+'SoilVue 5 cm
+Public SoilVUE_5(4)
+Alias SoilVUE_5(1)= SoilVue_VWC_5
+Alias SoilVUE_5(2)=  SoilVue_Perm_5
+Alias SoilVUE_5(3)= SoilVue_Temp_5
+Alias SoilVUE_5(4)= SoilVue_EC_5
+Units  SoilVue_VWC_5 = m^3/m^3
+Units  SoilVue_Perm_5 = unitless
+Units  SoilVue_Temp_5 = Deg c
+Units  SoilVue_EC_5 = dS/m
+
+'SoilVue 10 cm
+Public SoilVUE_10(4)
+Alias SoilVUE_10(1)= SoilVue_VWC_10
+Alias SoilVUE_10(2)= SoilVue_Perm_10
+Alias SoilVUE_10(3)= SoilVue_Temp_10
+Alias SoilVUE_10(4)= SoilVue_EC_10
+Units  SoilVue_VWC_10 = m^3/m^3
+Units  SoilVue_Perm_10 = unitless
+Units  SoilVue_Temp_10 = Deg c
+Units  SoilVue_EC_10 = dS/m
+
+'SoilVue 20 cm
+Public SoilVUE_20(4)
+Alias SoilVUE_20(1)= SoilVue_VWC_20
+Alias SoilVUE_20(2)= SoilVue_Perm_20
+Alias SoilVUE_20(3)= SoilVue_Temp_20
+Alias SoilVUE_20(4)= SoilVue_EC_20
+Units  SoilVue_VWC_20 = m^3/m^3
+Units  SoilVue_Perm_20 = unitless
+Units  SoilVue_Temp_20 = Deg c
+Units  SoilVue_EC_20 = dS/m
+
+'SoilVue 30 cm
+Public SoilVUE_30(4)
+Alias SoilVUE_30(1)= SoilVue_VWC_30
+Alias SoilVUE_30(2)= SoilVue_Perm_30
+Alias SoilVUE_30(3)= SoilVue_Temp_30
+Alias SoilVUE_30(4)= SoilVue_EC_30
+Units  SoilVue_VWC_30 = m^3/m^3
+Units  SoilVue_Perm_30 = unitless
+Units  SoilVue_Temp_30 = Deg c
+Units  SoilVue_EC_30 = dS/m
+
+'SoilVue 40 cm
+Public SoilVUE_40(4)
+Alias SoilVUE_40(1)= SoilVue_VWC_40
+Alias SoilVUE_40(2)= SoilVue_Perm_40
+Alias SoilVUE_40(3)= SoilVue_Temp_40
+Alias SoilVUE_40(4)= SoilVue_EC_40
+Units  SoilVue_VWC_40 = m^3/m^3
+Units  SoilVue_Perm_40 = unitless
+Units  SoilVue_Temp_40 = Deg c
+Units  SoilVue_EC_40 = dS/m
+
+'SoilVue 50 cm
+Public SoilVUE_50(4)
+Alias SoilVUE_50(1)= SoilVue_VWC_50
+Alias SoilVUE_50(2)= SoilVue_Perm_50
+Alias SoilVUE_50(3)= SoilVue_Temp_50
+Alias SoilVUE_50(4)= SoilVue_EC_50
+Units  SoilVue_VWC_50 = m^3/m^3
+Units  SoilVue_Perm_50 = unitless
+Units  SoilVue_Temp_50 = Deg c
+Units  SoilVue_EC_50 = dS/m
+
+
+
+'##### DATA TABLES #####
+
+'### BATTERY and PANEL TEMP ###
+DataTable(Table_Batt,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'Battery and panel temperature
+  Minimum (1,Batt,FP2,False,False)
+	Sample (1,PTemp,FP2)
+EndTable
+
+
+
+'### TE525MM RAIN GAUGE ###
+DataTable(Table_TE525MM,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'rain gauge
+  Totalize(1,TE525MM_Rain,FP2,False)  
+EndTable
+
+
+
+'### CS655 ###
+DataTable(Table_CS655,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+	'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'CS655
+	Average(1,CS655_VWC_5,FP2,False)
+	Average(1,CS655_EC_5,FP2,False)
+	Average(1,CS655_Temp_5,FP2,False)
+	Average(1,CS655_Perm_5,FP2,False)
+	Average(1,CS655_PA_5,FP2,False)
+	Average(1,CS655_VR_5,FP2,False)
+	Average(1,CS655_VWC_20,FP2,False)
+	Average(1,CS655_EC_20,FP2,False)
+	Average(1,CS655_Temp_20,FP2,False)
+	Average(1,CS655_Perm_20,FP2,False)
+	Average(1,CS655_PA_20,FP2,False)
+	Average(1,CS655_VR_20,FP2,False)
+	Average(1,CS655_VWC_40,FP2,False)
+	Average(1,CS655_EC_40,FP2,False)
+	Average(1,CS655_Temp_40,FP2,False)
+	Average(1,CS655_Perm_40,FP2,False)
+	Average(1,CS655_PA_40,FP2,False)
+	Average(1,CS655_VR_40,FP2,False)
+EndTable
+	
+
+
+'### TDR315N ###
+DataTable(Table_Acclima,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+
+  'TDR315
+	Average(1,Acclima_VWC_5,FP2,False)
+	Average(1,Acclima_Perm_5,FP2,False)
+	Average(1,Acclima_EC_5,FP2,False)
+	Average(1,Acclima_Temp_5,FP2,False)
+	Average(1,Acclima_VWC_20,FP2,False)
+	Average(1,Acclima_Perm_20,FP2,False)
+	Average(1,Acclima_EC_20,FP2,False)
+	Average(1,Acclima_Temp_20,FP2,False)
+	Average(1,Acclima_VWC_40,FP2,False)
+	Average(1,Acclima_Perm_40,FP2,False)
+	Average(1,Acclima_EC_40,FP2,False)
+	Average(1,Acclima_Temp_40,FP2,False)
+EndTable
+
+
+	
+'### THETAPROBE ###
+DataTable(Table_Thetaprobe,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+    
+  'Thetaprobe
+	Average(1,Thetaprobe_VWC_5,FP2,False)
+	Average(1,Thetaprobe_VWC_20,FP2,False)
+	Average(1,Thetaprobe_VWC_40,FP2,False)
+EndTable
+	
+
+
+'### TEROS 12 ###
+DataTable(Table_Teros12,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'Teros 12
+	Average(1,Teros12_VWC_5,FP2,False)
+	Average(1,Teros12_Perm_5,FP2,False)
+	Average(1,Teros12_RAW_5,FP2,False)
+	Average(1,Teros12_Temp_5,FP2,False)
+	Average(1,Teros12_EC_5,FP2,False)
+	Average(1,Teros12_VWC_20,FP2,False)
+	Average(1,Teros12_Perm_20,FP2,False)
+	Average(1,Teros12_RAW_20,FP2,False)
+	Average(1,Teros12_Temp_20,FP2,False)
+	Average(1,Teros12_EC_20,FP2,False)
+	Average(1,Teros12_VWC_40,FP2,False)
+	Average(1,Teros12_Perm_40,FP2,False)
+	Average(1,Teros12_RAW_40,FP2,False)
+	Average(1,Teros12_Temp_40,FP2,False)
+	Average(1,Teros12_EC_40,FP2,False)
+EndTable
+
+
+	
+'### TEROS 21 ###
+DataTable(Table_Teros21,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'Teros 21
+	Average(1,Teros21_Matric_P_5,FP2,False)
+	Average(1,Teros21_Temp_5,FP2,False)
+	Average(1,Teros21_Matric_P_20,FP2,False)
+	Average(1,Teros21_Temp_20,FP2,False)
+	Average(1,Teros21_Matric_P_40,FP2,False)
+	Average(1,Teros21_Temp_40,FP2,False)
+EndTable
+
+
+
+'### HYDRAPROBE ###
+DataTable(Table_Hydraprobe,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'Hydraprobe
+  Average(1,Hydraprobe_VWC_5,FP2,False)
+	Average(1,Hydraprobe_EC_5_cor,FP2,False)
+	Average(1,Hydraprobe_Temp_5_Deg_C,FP2,False)
+	Average(1,Hydraprobe_Temp_5_Deg_F,FP2,False)
+	Average(1,Hydraprobe_EC_5_uncor,FP2,False)
+	Average(1,Hydraprobe_Perm_real_5,FP2,False)
+	Average(1,Hydraprobe_Perm_imaginary_5,FP2,False)
+  Average(1,Hydraprobe_VWC_20,FP2,False)
+	Average(1,Hydraprobe_EC_20_cor,FP2,False)
+	Average(1,Hydraprobe_Temp_20_Deg_C,FP2,False)
+	Average(1,Hydraprobe_Temp_20_Deg_F,FP2,False)
+	Average(1,Hydraprobe_EC_20_uncor,FP2,False)
+	Average(1,Hydraprobe_Perm_real_20,FP2,False)
+	Average(1,Hydraprobe_Perm_imaginary_20,FP2,False)
+  Average(1,Hydraprobe_VWC_40,FP2,False)
+	Average(1,Hydraprobe_EC_40_cor,FP2,False)
+	Average(1,Hydraprobe_Temp_40_Deg_C,FP2,False)
+	Average(1,Hydraprobe_Temp_40_Deg_F,FP2,False)
+	Average(1,Hydraprobe_EC_40_uncor,FP2,False)
+	Average(1,Hydraprobe_Perm_real_40,FP2,False)
+	Average(1,Hydraprobe_Perm_imaginary_40,FP2,False)
+EndTable
+	
+
+
+'### GROPOINT ###
+DataTable(Table_GroPoint,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'Gropoint
+	Average(1,GroPoint_VWC_0_15,FP2,False)
+	Average(1,GroPoint_VWC_15_30,FP2,False)
+	Average(1,GroPoint_VWC_30_45,FP2,False)
+	Average(1,GroPoint_Temp_3,FP2,False)
+	Average(1,GroPoint_Temp_10,FP2,False)
+	Average(1,GroPoint_Temp_20,FP2,False)
+	Average(1,GroPoint_Temp_30,FP2,False)
+	Average(1,GroPoint_Temp_40,FP2,False)
+	Average(1,GroPoint_Temp_45,FP2,False)
+EndTable
+
+
+
+'### DRILL AND DROP ###
+DataTable(Table_DrillDrop,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long) 
+  
+  'Drill and drop
+	Average(1,DrillDrop_VWC_5,FP2,False)
+	Average(1,DrillDrop_VWC_15,FP2,False)
+	Average(1,DrillDrop_VWC_25,FP2,False)
+	Average(1,DrillDrop_VWC_35,FP2,False)
+	Average(1,DrillDrop_VWC_45,FP2,False)
+	Average(1,DrillDrop_VWC_55,FP2,False)
+	Average(1,DrillDrop_sal_5,FP2,False)
+	Average(1,DrillDrop_sal_15,FP2,False)
+	Average(1,DrillDrop_sal_25,FP2,False)
+	Average(1,DrillDrop_sal_35,FP2,False)
+	Average(1,DrillDrop_sal_45,FP2,False)
+	Average(1,DrillDrop_sal_55,FP2,False)
+	Average(1,DrillDrop_Temp_5,FP2,False)
+	Average(1,DrillDrop_Temp_15,FP2,False)
+	Average(1,DrillDrop_Temp_25,FP2,False)
+	Average(1,DrillDrop_Temp_35,FP2,False)
+	Average(1,DrillDrop_Temp_45,FP2,False)
+	Average(1,DrillDrop_Temp_55,FP2,False)
+EndTable
+
+
+
+'### SOILVUE 10 ###
+DataTable(Table_SoilVue,True,-1)
+  DataInterval(time_to_interval,interval,Min,lapses)
+  'station information
+  Sample(1,station,String)
+  Sample(1,latitude,IEEE4)
+  Sample(1,longitude,IEEE4)
+  Sample(1,altitude,Long)
+  
+  'SoilVue 10
+	Average(1,SoilVue_VWC_5,FP2,False)
+	Average(1,SoilVue_Perm_5,FP2,False)
+	Average(1,SoilVue_Temp_5,FP2,False)
+	Average(1,SoilVue_EC_5,FP2,False)
+	Average(1,SoilVue_VWC_10,FP2,False)
+	Average(1,SoilVue_Perm_10,FP2,False)
+	Average(1,SoilVue_Temp_10,FP2,False)
+	Average(1,SoilVue_EC_10,FP2,False)
+	Average(1,SoilVue_VWC_20,FP2,False)
+	Average(1,SoilVue_Perm_20,FP2,False)
+	Average(1,SoilVue_Temp_20,FP2,False)
+	Average(1,SoilVue_EC_20,FP2,False)
+	Average(1,SoilVue_VWC_30,FP2,False)
+	Average(1,SoilVue_Perm_30,FP2,False)
+	Average(1,SoilVue_Temp_30,FP2,False)
+	Average(1,SoilVue_EC_30,FP2,False)
+	Average(1,SoilVue_VWC_40,FP2,False)
+	Average(1,SoilVue_Perm_40,FP2,False)
+	Average(1,SoilVue_Temp_40,FP2,False)
+	Average(1,SoilVue_EC_40,FP2,False)
+	Average(1,SoilVue_VWC_50,FP2,False)
+	Average(1,SoilVue_Perm_50,FP2,False)
+	Average(1,SoilVue_Temp_50,FP2,False)
+	Average(1,SoilVue_EC_50,FP2,False)
+EndTable
+
+
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(20,Min,1,0)
+		'Default CR300 Datalogger Battery Voltage measurement 'Batt'
+		Battery(Batt)
+		'Default CR300 Datalogger Processor Temperature measurement 'PTemp'
+		PanelTemp(PTemp,60)
+		
+    SW12(1) 'Turn on power (SW12V) channel 
+
+    '### TE525MM RAIN GAUGE ###
+		PulseCount(TE525MM_Rain,1,P_SW,2,0,0.1,0)
+		
+
+
+		'### CS655 ###
+		SDI12Recorder(CS655_5(),C1,"a","M4!",1,0,-1)
+		SDI12Recorder(CS655_20(),C1,"b","M4!",1,0,-1)
+		SDI12Recorder(CS655_40(),C1,"c","M4!",1,0,-1)
+    		
+
+
+    '### TDR315N ###
+    SDI12Recorder(Acclima_5(),C1,"d","M!",1,0,-1)
+    SDI12Recorder(Acclima_20(),C1,"e","M!",1,0,-1)
+		SDI12Recorder(Acclima_40(),C1,"f","M!",1,0,-1)
+		
+
+
+    '### THETAPROBE ### 
+		'NB: If you connect thetaprobe power cable to the SW12 channel you need to 
+		'first turn on the power to the thetaprobe sensor by writing code line " SW12(1) "
+     VoltDiff(Thetaprobe_V_5,1,mv2500,1,False,0,_60Hz,.001,0)
+     VoltDiff(Thetaprobe_V_20,1,mv2500,2,False,0,_60Hz,.001,0)
+     VoltDiff(Thetaprobe_V_40,1,mv2500,3,False,0,_60Hz,.001,0)
+		'Generalized Theta Probe VWC calculations for mineral soils (see Thetaprobe manual)
+     Thetaprobe_VWC_5 = -0.071+(0.735*Thetaprobe_V_5)+(0.75*Thetaprobe_V_5^2)-(8.759*Thetaprobe_V_5^3)+(21.838*Thetaprobe_V_5^4)-(21.998*Thetaprobe_V_5^5)+(8.097*Thetaprobe_V_5^6)
+     Thetaprobe_VWC_20 = -0.071+(0.735*Thetaprobe_V_20)+(0.75*Thetaprobe_V_20^2)-(8.759*Thetaprobe_V_20^3)+(21.838*Thetaprobe_V_20^4)-(21.998*Thetaprobe_V_20^5)+(8.097*Thetaprobe_V_20^6)
+     Thetaprobe_VWC_40 = -0.071+(0.735*Thetaprobe_V_40)+(0.75*Thetaprobe_V_40^2)-(8.759*Thetaprobe_V_40^3)+(21.838*Thetaprobe_V_40^4)-(21.998*Thetaprobe_V_40^5)+(8.097*Thetaprobe_V_40^6)
+     
+
+
+		'### TEROS 12 ###
+		SDI12Recorder(Teros12_5(),C1,"g","M!",1,0,-1)
+		SDI12Recorder(Teros12_20(),C1,"h","M!",1,0,-1)
+		SDI12Recorder(Teros12_40(),C1,"i","M!",1,0,-1)
+
+		'Calculate volumetric water content and Permittivity from Teros 12 readings
+   	Teros12_VWC_5 = (3.879*10^-4)*Teros12_RAW_5 - 0.6956
+		Teros12_Perm_5 = ((2.887*10^-9)*Teros12_RAW_5^3 - (2.080*10^-5)*Teros12_RAW_5^2 + (5.276*10^-2)*Teros12_RAW_5 -43.39)^2
+		Teros12_VWC_20 = (3.879*10^-4)*Teros12_RAW_20 - 0.6956
+		Teros12_Perm_20 = ((2.887*10^-9)*Teros12_RAW_20^3 - (2.080*10^-5)*Teros12_RAW_20^2 + (5.276*10^-2)*Teros12_RAW_20 -43.39)^2
+		Teros12_VWC_40 = (3.879*10^-4)*Teros12_RAW_40 - 0.6956
+		Teros12_Perm_40 = ((2.887*10^-9)*Teros12_RAW_40^3 - (2.080*10^-5)*Teros12_RAW_40^2 + (5.276*10^-2)*Teros12_RAW_40 -43.39)^2	
+    
+
+
+		'### TEROS 21 ###
+		SDI12Recorder(Teros21_5(),C1,"j","M!",1,0,-1)
+		SDI12Recorder(Teros21_20(),C1,"k","M!",1,0,-1)
+		SDI12Recorder(Teros21_40(),C1,"l","M!",1,0,-1)
+    
+
+
+    '### HYDRAPROBE ###
+    SDI12Recorder(Hydraprobe_5(),C1,"m","M!",1,0,-1)
+		'Reset all Hydraprobe_5 measurements if NAN is returned to Hydraprobe_5(1)
+		If Hydraprobe_5(1)=NAN Then Move(Hydraprobe_5(),7,NAN,1)
+		SDI12Recorder(Hydraprobe_20(),C1,"n","M!",1,0,-1)
+		If Hydraprobe_20(1)=NAN Then Move(Hydraprobe_20(),7,NAN,1)
+		SDI12Recorder(Hydraprobe_40(),C1,"o","M!",1,0,-1)
+		If Hydraprobe_40(1)=NAN Then Move(Hydraprobe_40(),7,NAN,1)
+
+
+
+   	'### GROPOINT ### 
+		'Gropoint moisture readings
+		SDI12Recorder(GroPoint_moisture(),C1,"p","M!",1,0,-1)
+		
+    'Gropoint temperature readings 
+		SDI12Recorder(GroPoint_temperature(),C1,"p","M1!",1,0,-1)
+ 		
+
+
+		'### DRILL AND DROP ###
+		'Drill and drop moisture readings
+		SDI12Recorder(Drilldrop_moisture(),C1,"q","M!",1,0,-1) 
+		
+    'Drill and drop salinity readings
+		SDI12Recorder(Drilldrop_salinity(),C1,"q","M2!",1,0,-1)
+		
+    'Drill and drop temperature readings
+		SDI12Recorder(Drilldrop_temperature(),C1,"q","M4!",1,0,-1)		
+    
+
+
+    '### SOILVUE 10 ###
+		SDI12Recorder(SoilVUE_5(),C1,"r","M1!",1,0,-1)
+		SDI12Recorder(SoilVUE_10(),C1,"r","M2!",1,0,-1)
+		SDI12Recorder(SoilVUE_20(),C1,"r","M3!",1,0,-1)
+		SDI12Recorder(SoilVUE_30(),C1,"r","M4!",1,0,-1)
+		SDI12Recorder(SoilVUE_40(),C1,"r","M5!",1,0,-1)
+		SDI12Recorder(SoilVUE_50(),C1,"r","M6!",1,0,-1)
+    
+    SW12(0) 'Turn off power (SW12V) channel 
+
+		'## Call Data Tables and Store Data ##
+		CallTable Table_Batt
+		CallTable Table_TE525MM
+		CallTable Table_CS655
+		CallTable Table_Acclima
+		CallTable Table_Thetaprobe
+		CallTable Table_Teros12
+		CallTable Table_Teros21
+		CallTable Table_Hydraprobe
+		CallTable Table_GroPoint
+		CallTable Table_DrillDrop
+		CallTable Table_SoilVue
+
+	NextScan
+EndProg

@@ -1,0 +1,612 @@
+'Title: Connecting all sensors to a CR300 datalogger
+'Date: 09/28/2022
+'Author: Seyed Ali Azizi & Briana Wyatt
+'Correspondence: seyedali_azizi@tamu.edu
+
+
+'change this constant to match the number of sensors attached to your com port. Sensors must be numbered sequentially from 1 to Sensornum
+Const SensorNum = 4
+
+Dim i
+
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Units BattV = Volts
+Units PTemp_C = Deg C
+
+
+Public adr_CS655(SensorNum) As String = {"Q","R","S","T"}
+Public CS655(SensorNum,6)
+Public VWC_CS655(SensorNum)
+Public EC_CS655(SensorNum)
+Public Temp_CS655(SensorNum)
+Public Perm_CS655(SensorNum)
+Public PA_CS655(SensorNum)
+Public VR_CS655(SensorNum)
+
+Units VWC_CS655 = m^3/m^3
+Units EC_CS655 = dS/m
+Units Temp_CS655 = Deg C
+Units Perm_CS655 = unitless
+Units PA_CS655 = nSec
+Units VR_CS655 = unitless
+
+'Define Data Tables
+DataTable(Table_CS655,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(SensorNum,VWC_CS655(),FP2,False)
+	Average(SensorNum,EC_CS655(),FP2,False)
+	Average(SensorNum,Temp_CS655(),FP2,False)
+	Average(SensorNum,Perm_CS655(),FP2,False)
+	Average(SensorNum,PA_CS655(),FP2,False)
+	Average(SensorNum,VR_CS655(),FP2,False)
+EndTable
+
+
+
+Public DD(6)
+Public DD_2(6)
+Public DD_3(6)
+
+Alias DD(1)=Temp_1
+Alias DD(2)=Temp_2
+Alias DD(3)=Temp_3
+Alias DD(4)=Temp_4
+Alias DD(5)=Temp_5
+Alias DD(6)=Temp_6
+Alias DD_2(1)=VWC_1
+Alias DD_2(2)=VWC_2
+Alias DD_2(3)=VWC_3
+Alias DD_2(4)=VWC_4
+Alias DD_2(5)=VWC_5
+Alias DD_2(6)=VWC_6
+Alias DD_3(1)=Sal_1
+Alias DD_3(2)=Sal_2
+Alias DD_3(3)=Sal_3
+Alias DD_3(4)=Sal_4
+Alias DD_3(5)=Sal_5
+Alias DD_3(6)=Sal_6
+
+Units Temp_1=Deg C
+Units Temp_2=Deg C
+Units Temp_3=Deg C
+Units Temp_4=Deg C
+Units Temp_5=Deg C
+Units Temp_6=Deg C
+Units VWC_1=%
+Units VWC_2=%
+Units VWC_3=%
+Units VWC_4=%
+Units VWC_5=%
+Units VWC_6=%
+Units Sal_1=VIC
+Units Sal_2=VIC
+Units Sal_3=VIC
+Units Sal_4=VIC
+Units Sal_5=VIC
+Units Sal_6=VIC
+
+'Define Data Tables
+DataTable(Table_DD,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(1,Temp_1,FP2,False)
+	Average(1,Temp_2,FP2,False)
+	Average(1,Temp_3,FP2,False)
+	Average(1,Temp_4,FP2,False)
+	Average(1,Temp_5,FP2,False)
+	Average(1,Temp_6,FP2,False)
+	Average(1,VWC_1,FP2,False)
+	Average(1,VWC_2,FP2,False)
+	Average(1,VWC_3,FP2,False)
+	Average(1,VWC_4,FP2,False)
+	Average(1,VWC_5,FP2,False)
+	Average(1,VWC_6,FP2,False)
+	Average(1,Sal_1,FP2,False)
+	Average(1,Sal_2,FP2,False)
+	Average(1,Sal_3,FP2,False)
+	Average(1,Sal_4,FP2,False)
+	Average(1,Sal_5,FP2,False)
+	Average(1,Sal_6,FP2,False)
+EndTable
+
+
+
+Public GroPoint(6)
+Public GroPoint_2(3)
+
+Alias GroPoint(1)=Temp_GP_1
+Alias GroPoint(2)=Temp_GP_2
+Alias GroPoint(3)=Temp_GP_3
+Alias GroPoint(4)=Temp_GP_4
+Alias GroPoint(5)=Temp_GP_5
+Alias GroPoint(6)=Temp_GP_6
+Alias GroPoint_2(1)=VWC_GP_1
+Alias GroPoint_2(2)=VWC_GP_2
+Alias GroPoint_2(3)=VWC_GP_3
+
+
+Units Temp_GP_1 = Deg C
+Units Temp_GP_2 = Deg C
+Units Temp_GP_3 = Deg C
+Units Temp_GP_4 = Deg C
+Units Temp_GP_5 = Deg C
+Units Temp_GP_6 = Deg C
+Units VWC_GP_1 = %
+Units VWC_GP_2 = %
+Units VWC_GP_3 = %
+
+'Define Data Tables
+DataTable(Table_GroPoint,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(1,Temp_GP_1,FP2,False)
+	Average(1,Temp_GP_2,FP2,False)
+	Average(1,Temp_GP_3,FP2,False)
+	Average(1,Temp_GP_4,FP2,False)
+	Average(1,Temp_GP_5,FP2,False)
+	Average(1,Temp_GP_6,FP2,False)
+	Average(1,VWC_GP_1,FP2,False)
+	Average(1,VWC_GP_2,FP2,False)
+	Average(1,VWC_GP_3,FP2,False)
+EndTable
+
+
+
+Public adr_HydraProbe(SensorNum) As String = {"E","F","G","H"}
+Public Hydraprobe(SensorNum,7)
+Public VWC_Hydraprobe(SensorNum)
+Public EC_corrected_Hydraprobe(SensorNum) 'corrected with temperature
+Public Temp_Deg_C_Hydraprobe(SensorNum)
+Public Temp_Deg_F_Hydraprobe(SensorNum)
+Public EC_uncorrected_Hydraprobe(SensorNum)
+Public Perm_real_Hydraprobe(SensorNum)
+Public Perm_imaginary_Hydraprobe(SensorNum)
+
+
+Units VWC_Hydraprobe = m^3 /m^3
+Units EC_corrected_Hydraprobe = S/m
+Units Temp_Deg_C_Hydraprobe = Deg C
+Units Temp_Deg_F_Hydraprobe = Deg F
+Units EC_uncorrected_Hydraprobe = S/m
+Units Perm_real_Hydraprobe = unitless
+Units Perm_imaginary_Hydraprobe = unitless
+
+'Define Data Tables
+DataTable(Table_HydraProbe,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(SensorNum,VWC_Hydraprobe(),FP2,False)
+	Average(SensorNum,EC_corrected_Hydraprobe(),FP2,False)
+	Average(SensorNum,Temp_Deg_C_Hydraprobe(),FP2,False)
+	Average(SensorNum,Temp_Deg_F_Hydraprobe(),FP2,False)
+	Average(SensorNum,EC_uncorrected_Hydraprobe(),FP2,False)
+	Average(SensorNum,Perm_real_Hydraprobe(),FP2,False)
+	Average(SensorNum,Perm_imaginary_Hydraprobe(),FP2,False)
+EndTable
+
+
+
+Public SoilVUE_5cm(4)
+Public SoilVUE_10cm(4)
+Public SoilVUE_20cm(4)
+Public SoilVUE_30cm(4)
+Public SoilVUE_40cm(4)
+Public SoilVUE_50cm(4)
+
+Alias SoilVUE_5cm(1)=VWC_5cm
+Alias SoilVUE_5cm(2)=Ka_5cm
+Alias SoilVUE_5cm(3)=T_5cm
+Alias SoilVUE_5cm(4)=BulkEC_5cm
+Alias SoilVUE_10cm(1)=VWC_10cm
+Alias SoilVUE_10cm(2)=Ka_10cm
+Alias SoilVUE_10cm(3)=T_10cm
+Alias SoilVUE_10cm(4)=BulkEC_10cm
+Alias SoilVUE_20cm(1)=VWC_20cm
+Alias SoilVUE_20cm(2)=Ka_20cm
+Alias SoilVUE_20cm(3)=T_20cm
+Alias SoilVUE_20cm(4)=BulkEC_20cm
+Alias SoilVUE_30cm(1)=VWC_30cm
+Alias SoilVUE_30cm(2)=Ka_30cm
+Alias SoilVUE_30cm(3)=T_30cm
+Alias SoilVUE_30cm(4)=BulkEC_30cm
+Alias SoilVUE_40cm(1)=VWC_40cm
+Alias SoilVUE_40cm(2)=Ka_40cm
+Alias SoilVUE_40cm(3)=T_40cm
+Alias SoilVUE_40cm(4)=BulkEC_40cm
+Alias SoilVUE_50cm(1)=VWC_50cm
+Alias SoilVUE_50cm(2)=Ka_50cm
+Alias SoilVUE_50cm(3)=T_50cm
+Alias SoilVUE_50cm(4)=BulkEC_50cm
+
+Units VWC_5cm=m^3/m^3
+Units Ka_5cm=unitless
+Units T_5cm=Deg C
+Units BulkEC_5cm=dS/m
+Units VWC_10cm=m^3/m^3
+Units Ka_10cm=unitless
+Units T_10cm=Deg C
+Units BulkEC_10cm=dS/m
+Units VWC_20cm=m^3/m^3
+Units Ka_20cm=unitless
+Units T_20cm=Deg C
+Units BulkEC_20cm=dS/m
+Units VWC_30cm=m^3/m^3
+Units Ka_30cm=unitless
+Units T_30cm=Deg C
+Units BulkEC_30cm=dS/m
+Units VWC_40cm=m^3/m^3
+Units Ka_40cm=unitless
+Units T_40cm=Deg C
+Units BulkEC_40cm=dS/m
+Units VWC_50cm=m^3/m^3
+Units Ka_50cm=unitless
+Units T_50cm=Deg C
+Units BulkEC_50cm=dS/m
+
+'Define Data Tables
+DataTable(Table_SoilVUE,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(1,VWC_5cm,FP2,False)
+	Average(1,Ka_5cm,FP2,False)
+	Average(1,T_5cm,FP2,False)
+	Average(1,BulkEC_5cm,FP2,False)
+	Average(1,VWC_10cm,FP2,False)
+	Average(1,Ka_10cm,FP2,False)
+	Average(1,T_10cm,FP2,False)
+	Average(1,BulkEC_10cm,FP2,False)
+	Average(1,VWC_20cm,FP2,False)
+	Average(1,Ka_20cm,FP2,False)
+	Average(1,T_20cm,FP2,False)
+	Average(1,BulkEC_20cm,FP2,False)
+	Average(1,VWC_30cm,FP2,False)
+	Average(1,Ka_30cm,FP2,False)
+	Average(1,T_30cm,FP2,False)
+	Average(1,BulkEC_30cm,FP2,False)
+	Average(1,VWC_40cm,FP2,False)
+	Average(1,Ka_40cm,FP2,False)
+	Average(1,T_40cm,FP2,False)
+	Average(1,BulkEC_40cm,FP2,False)
+	Average(1,VWC_50cm,FP2,False)
+	Average(1,Ka_50cm,FP2,False)
+	Average(1,T_50cm,FP2,False)
+	Average(1,BulkEC_50cm,FP2,False)
+EndTable
+
+
+
+Public adr_TDR315N(SensorNum) As String = {"A","B","C","D"}
+Public VWC_TDR315N(SensorNum)
+Public Temp_TDR315N(SensorNum)
+Public Perm_TDR315N(SensorNum)
+Public EC_TDR315N(SensorNum)
+Public Acclima(SensorNum,4)
+
+Units VWC_TDR315N = %
+Units Temp_TDR315N = Deg C
+Units Perm_TDR315N = unitless
+Units EC_TDR315N = microS/cm
+
+'Define Data Tables
+DataTable(Table_TDR315,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(SensorNum,VWC_TDR315N(),FP2,False)
+	Average(SensorNum,Temp_TDR315N(),FP2,False)
+	Average(SensorNum,Perm_TDR315N(),FP2,False)
+	Average(SensorNum,EC_TDR315N(),FP2,False)
+EndTable
+
+
+
+Public adr_TEROS12(SensorNum) As String = {"I","J","K","L"}
+Public VWC_TEROS12(SensorNum)
+Public Perm_TEROS12(SensorNum)
+Public RAW_TEROS12(SensorNum)
+Public Temp_TEROS12(SensorNum)
+Public EC_TEROS12(SensorNum)
+Public Teros12(SensorNum,3)
+
+Units VWC_TEROS12 = m^3/m^3
+Units Perm_TEROS12 = Unitless
+Units RAW_TEROS12 = Unitless
+Units Temp_TEROS12 = Deg C
+Units EC_TEROS12 = dS/m
+
+'Define Data Tables
+DataTable(Table_Teros12,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(SensorNum,VWC_TEROS12(),FP2,False)
+	Average(SensorNum,Perm_TEROS12(),FP2,False)
+	Average(SensorNum,RAW_TEROS12(),FP2,False)
+	Average(SensorNum,Temp_TEROS12(),FP2,False)
+	Average(SensorNum,EC_TEROS12(),FP2,False)
+EndTable
+
+
+
+Public adr_Teros21(SensorNum) As String = {"M","N","O","P"}
+Public Teros21(SensorNum,2)
+Public Matric_P_Teros21(SensorNum)
+Public Temp_Teros21(SensorNum)
+
+Units Matric_P_Teros21 = kPa
+Units Temp_Teros21 = Deg C
+
+
+'Define Data Tables
+DataTable(Table_Teros21,True,-1)
+	DataInterval(0,60,Min,10)
+	Average(SensorNum,Matric_P_Teros21(),FP2,False)
+	Average(SensorNum,Temp_Teros21(),FP2,False)
+EndTable
+
+
+
+Public Volt_dif1
+Public Theta_VWC1
+'Public Res1
+'Public Temp1
+'Dim ML3_mv1
+'Dim ln_Res1
+
+
+Public Volt_dif2
+Public Theta_VWC2
+'Public Res2
+'Public Temp2
+'Dim ML3_mv2
+'Dim ln_Res2
+
+
+Public Volt_dif3
+Public Theta_VWC3
+'Public Res3
+'Public Temp3
+'Dim ML3_mv3
+'Dim ln_Res3
+
+
+Public Volt_dif4
+Public Theta_VWC4
+'Public Res4
+'Public Temp4
+'Dim ML3_mv4
+'Dim ln_Res4
+
+Units Volt_dif1 = Volt
+Units Theta_VWC1 = cm^3 / cm^3
+'Units Res1 = ohms 
+'Units Temp1 = Deg C
+
+
+Units Volt_dif2 = Volt
+Units Theta_VWC2 = cm^3 / cm^3
+'Units Res2 = ohms 
+'Units Temp2 = Deg C
+
+
+Units Volt_dif3 = Volt
+Units Theta_VWC3 = cm^3 / cm^3
+'Units Res3 = ohms 
+'Units Temp3 = Deg C
+
+
+Units Volt_dif4 = Volt
+Units Theta_VWC4 = cm^3 / cm^3
+'Units Res4 = ohms 
+'Units Temp4 = Deg C
+
+
+
+'Define Data Tables.
+DataTable (Table_ThetaProbe,1,-1) 
+	DataInterval (0,60,Min,10)
+	Average (1,Volt_dif1,FP2,False)
+	Average (1,Theta_VWC1,FP2,False)
+'	Sample (1,Res1,FP2,False)
+'	Sample (1,Temp1,FP2,False)
+	Average (1,Volt_dif2,FP2,False)
+	Average (1,Theta_VWC2,FP2,False)
+'	Sample (1,Res2,FP2,False)
+'	Sample (1,Temp2,FP2,False)
+	Average (1,Volt_dif3,FP2,False)
+	Average (1,Theta_VWC3,FP2,False)
+'	Sample (1,Res3,FP2,False)
+'	Sample (1,Temp3,FP2,False)
+	Average (1,Volt_dif4,FP2,False)
+	Average (1,Theta_VWC4,FP2,False)
+'	Sample (1,Res4,FP2,False)
+'	Sample (1,Temp4,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,60,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+	Sample(1,BattV,FP2)
+	Sample(1,PTemp_C,FP2)
+EndTable
+
+
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(20,Min,1,0)
+	  For i = 1 To SensorNum
+		'Default CR300 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR300 Datalogger Processor Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		
+
+
+		SW12(1)
+'    Delay(0,150,mSec)
+		SDI12Recorder(Acclima(i,1),C2,adr_TDR315N(i),"M!",1,0,-1)
+		'Reset all Acclima Sensor measurements if NAN is returned to Acclima(1)
+		If Acclima(i,1)=NAN Then Move(Acclima(i,1),4,NAN,1)
+		VWC_TDR315N(i) = Acclima(i,1)
+		Temp_TDR315N(i) = Acclima(i,2)
+		Perm_TDR315N(i) = Acclima(i,3)
+		EC_TDR315N(i) = Acclima(i,4)
+		SW12(0)
+
+
+
+
+'		SW12(1)
+		'CS650/655 Water Content Reflectometer measurements 'VWC', 'EC', 'Temp','Perm', 'PA', and 'VR'
+		SDI12Recorder(CS655(i,1),C1,adr_CS655(i),"M4!",1,0,-1)
+		VWC_CS655(i) = CS655(i,1)
+		EC_CS655(i) = CS655(i,2)
+		Temp_CS655(i) = CS655(i,3)
+		Perm_CS655(i) = CS655(i,4)
+		PA_CS655(i) = CS655(i,5)
+		VR_CS655(i) = CS655(i,6)
+'		SW12(0)
+		
+
+'		SW12(1)
+		SDI12Recorder(DD(),C1,"d","M4!",1,0,-1)
+		'Reset all DD Sensor measurements if NAN is returned to DD(1)
+		If DD(1)=NAN Then Move(DD(),6,NAN,1)
+		SDI12Recorder(DD_2(),C1,"d","M!",1,0,-1)
+		'Reset all DD Sensor measurements if NAN is returned to DD_2(1)
+		If DD_2(1)=NAN Then Move(DD_2(),6,NAN,1)
+		SDI12Recorder(DD_3(),C1,"d","M2!",1,0,-1)
+		'Reset all DD Sensor measurements if NAN is returned to DD_3(1)
+		If DD_3(1)=NAN Then Move(DD_3(),6,NAN,1)
+'		SW12(0)
+
+
+
+'		SW12(1)
+		SDI12Recorder(GroPoint(),C1,"g","M1!",1,0,-1)
+		'Reset all GroPoint Sensor measurements if NAN is returned to GroPoint(1)
+		If GroPoint(1)=NAN Then Move(GroPoint(),6,NAN,1)
+		SDI12Recorder(GroPoint_2(),C1,"g","M!",1,0,-1)
+		'Reset all GroPoint Sensor measurements if NAN is returned to GroPoint_2(1)
+		If GroPoint_2(1)=NAN Then Move(GroPoint_2(),3,NAN,1)
+'		SW12(0)
+
+		
+'
+'		SW12(1)
+		SDI12Recorder(Hydraprobe(i,1),C1,adr_HydraProbe(i),"M!",1,0,-1)
+		'Reset all Hydraprobe measurements if NAN is returned to Hydraprobe(1)
+		If Hydraprobe(i,1)=NAN Then Move(Hydraprobe(i,1),7,NAN,1)
+		VWC_Hydraprobe(i) = Hydraprobe(i,1)
+		EC_corrected_Hydraprobe(i) = Hydraprobe(i,2)
+		Temp_Deg_C_Hydraprobe(i) = Hydraprobe(i,3)
+		Temp_Deg_F_Hydraprobe(i) = Hydraprobe(i,4)
+		EC_uncorrected_Hydraprobe(i) = Hydraprobe(i,5)
+		Perm_real_Hydraprobe(i) = Hydraprobe(i,6)
+		Perm_imaginary_Hydraprobe(i) = Hydraprobe(i,7)
+'		SW12(0)
+
+'
+'		If TimeIntoInterval(0,1,Min) Then
+			'Turn the SoilVUE10 Complete Soil Profiler on
+'			SW12(1)
+			'Let the SoilVUE10 Complete Soil Profiler warm-up before taking measurements
+'			Delay(0,2,Sec)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_5cm', 'Ka_5cm', 'T_5cm', and 'BulkEC_5cm'
+			SDI12Recorder(SoilVUE_5cm(),C1,"r","M1!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_10cm', 'Ka_10cm', 'T_10cm', and 'BulkEC_10cm'
+			SDI12Recorder(SoilVUE_10cm(),C1,"r","M2!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_20cm', 'Ka_20cm', 'T_20cm', and 'BulkEC_20cm'
+			SDI12Recorder(SoilVUE_20cm(),C1,"r","M3!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_30cm', 'Ka_30cm', 'T_30cm', and 'BulkEC_30cm'
+			SDI12Recorder(SoilVUE_30cm(),C1,"r","M4!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_40cm', 'Ka_40cm', 'T_40cm', and 'BulkEC_40cm'
+			SDI12Recorder(SoilVUE_40cm(),C1,"r","M5!",1,0,-1)
+			'SoilVUE10 Complete Soil Profiler measurements 'VWC_50cm', 'Ka_50cm', 'T_50cm', and 'BulkEC_50cm'
+			SDI12Recorder(SoilVUE_50cm(),C1,"r","M6!",1,0,-1)
+			'Turn the SoilVUE10 Complete Soil Profiler off
+'			SW12(0)
+'		EndIf
+
+
+
+
+
+'		SW12(1)
+		'Teros 12 measurements
+		SDI12Recorder(Teros12(i,1),C1,adr_TEROS12(i),"M!",1,0,-1)
+		'Reset all Teros 12 Sensor measurements if NAN is returned to Teros12(1)
+		If Teros12(i,1)=NAN Then Move(Teros12(i,1),3,NAN,1)
+		RAW_TEROS12(i) = Teros12(i,1)
+		Temp_TEROS12(i) = Teros12(i,2)
+		EC_TEROS12(i) = Teros12(i,3)
+		'Calculate volumetric water content
+    VWC_TEROS12(i) = (3.879*10^-4)*Teros12(i,1) - 0.6956
+    'Calculate apparent dielectric permittivity
+    Perm_TEROS12(i) = ((2.887*10^-9)*Teros12(i,1)^3 - (2.080*10^-5)*Teros12(i,1)^2 + (5.276*10^-2)*Teros12(i,1) -43.39)^2
+'		SW12(0)
+
+
+
+'		SW12(1)
+		'Teros 21 measurements
+    SDI12Recorder(Teros21(i,1),C1,adr_TEROS21(i),"M!",1,0,-1)
+		'Reset all Teros 21 measurements if NAN is returned to Teros21(1)
+		If Teros21(i,1)=NAN Then Move(Teros21(i,1),2,NAN,1)
+		Matric_P_Teros21(i) = Teros21(i,1)
+		Temp_Teros21(i) = Teros21(i,2)
+'		SW12(0)
+
+
+		'Turn on the power to the sensor
+'		SW12(1)
+'		Delay(0,750,mSec) 
+		
+		'Theta probe differential voltage measurements
+    VoltSe(Volt_dif1,1,mv2500,1,False,0,_60Hz,.001,0)
+    VoltSe(Volt_dif2,1,mv2500,2,False,0,_60Hz,.001,0)
+    VoltSe(Volt_dif3,1,mv2500,4,False,0,_60Hz,.001,0)
+    VoltSe(Volt_dif4,1,mv2500,6,False,0,_60Hz,.001,0)
+    'VWC calculations for mineral soils from manual
+    Theta_VWC1 = -0.071+(0.735*Volt_dif1)+(0.75*Volt_dif1^2)-(8.759*Volt_dif1^3)+(21.838*Volt_dif1^4)-(21.998*Volt_dif1^5)+(8.097*Volt_dif1^6)
+    Theta_VWC2 = -0.071+(0.735*Volt_dif2)+(0.75*Volt_dif2^2)-(8.759*Volt_dif2^3)+(21.838*Volt_dif2^4)-(21.998*Volt_dif2^5)+(8.097*Volt_dif2^6)
+    Theta_VWC3 = -0.071+(0.735*Volt_dif3)+(0.75*Volt_dif3^2)-(8.759*Volt_dif3^3)+(21.838*Volt_dif3^4)-(21.998*Volt_dif3^5)+(8.097*Volt_dif3^6)
+    Theta_VWC4 = -0.071+(0.735*Volt_dif4)+(0.75*Volt_dif4^2)-(8.759*Volt_dif4^3)+(21.838*Volt_dif4^4)-(21.998*Volt_dif4^5)+(8.097*Volt_dif4^6)
+'    SW12(0) 'Turn power off
+    
+    'Resistance measurement accross the excitation channels using the half bridge command
+'    BrHalf (ML3_mv1,1,mv2500,3,Vx2,1,2500,True,0,_60Hz,1,0)
+'    BrHalf (ML3_mv2,1,mv2500,3,Vx2,1,2500,True,0,_60Hz,1,0)
+'    BrHalf (ML3_mv3,1,mv2500,3,Vx2,1,2500,True,0,_60Hz,1,0)
+'    BrHalf (ML3_mv4,1,mv2500,3,Vx2,1,2500,True,0,_60Hz,1,0)
+
+
+    'Convert mV to resistance
+'    Res1 = 10000*ML3_mv1/(1-ML3_mv1)
+'    Res2 = 10000*ML3_mv2/(1-ML3_mv2)
+'    Res3 = 10000*ML3_mv3/(1-ML3_mv3)
+'    Res4 = 10000*ML3_mv4/(1-ML3_mv4)
+'    Calculate the natural log of the resistance:
+'     ln_Res1 = LOG(Res1)
+'     ln_Res2 = LOG(Res2)
+'     ln_Res3 = LOG(Res3)
+'     ln_Res4 = LOG(Res4)
+'
+'    convert resistance to temperature 
+'    Temp1 = 1/( (7.8480463e-4) + (2.6905669e-4)*ln_Res1 + (1.1660856e-7)*(ln_Res1^3)) - 273.15
+'    Temp2 = 1/( (7.8480463e-4) + (2.6905669e-4)*ln_Res2 + (1.1660856e-7)*(ln_Res2^3)) - 273.15
+'    Temp3 = 1/( (7.8480463e-4) + (2.6905669e-4)*ln_Res3 + (1.1660856e-7)*(ln_Res3^3)) - 273.15
+'    Temp4 = 1/( (7.8480463e-4) + (2.6905669e-4)*ln_Res4 + (1.1660856e-7)*(ln_Res4^3)) - 273.15
+
+
+		Next i
+		'Call Data Tables and Store Data
+		CallTable Table_CS655
+		CallTable Table_DD
+		CallTable Table_GroPoint
+		CallTable Table_HydraProbe
+		CallTable Table_SoilVUE
+		CallTable Table_TDR315
+		CallTable Table_Teros12
+		CallTable Table_Teros21
+		CallTable Table_ThetaProbe
+		CallTable Table2
+	NextScan
+EndProg

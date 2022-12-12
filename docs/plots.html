@@ -3,19 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-
-    <title>REPL</title>
+    <title>MIST Plots</title>
 
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js"></script>
-
     <style>
         .container{
             margin-left: 10%;
@@ -32,22 +29,13 @@
 
     <div class="container">
         <h1>Explore MIST Data</h1>
+        <select id="testbed-select">
+            <option value="Kansas_State_University">Kansas State University</option>
+        </select>
         <select id="sites-select">
-            <option value="CR300-23667">KSU Site 1 (CR300-23667)</option>
-            <option value="CR300-10553">KSU Site 2 (CR300-10553)</option>
-            <option value="CR300-23666">KSU Site 3 (CR300-23666)</option>
-        </select>
-        <select id="depths-select">
-            <option value="5">5 cm</option>
-            <option value="20">20 cm</option>
-            <option value="40">40 cm</option>
-        </select>
-        <select id="variables-select">
-            <option value="Temp">Soil temperature</option>
-            <option value="VWC">Volumetric water content</option>
-            <option value="Matric">Matric potential</option>
-            <option value="EC">Electrical conductivity</option>
-            <option value="Perm">Permittivity</option>
+            <option value="CR300-23667">Site 1 (CR300-23667)</option>
+            <option value="CR300-10553">Site 2 (CR300-10553)</option>
+            <option value="CR300-23666">Site 3 (CR300-23666)</option>
         </select>
         <button id="btn-plot" py-click="plot_data()">Create plot</button>
         <br/>
@@ -65,63 +53,174 @@
     <py-script>
         import json
         import pyodide
-   
         import pandas as pd
         from js import Bokeh, console, JSON, document
         from bokeh.embed import json_item
         from bokeh.plotting import figure
         from bokeh.resources import CDN
         from bokeh.palettes import Paired12 as colors
+        from bokeh.layouts import column
 
         def update_status(new_status):
             document.getElementById("status").innerHTML = new_status
+        
+        sensors = {'Acclima':{'5':['Acclima_VWC_5_Avg','Acclima_Temp_5_Avg'],
+                                '20':['Acclima_VWC_20_Avg','Acclima_Temp_20_Avg'],
+                                '40':['Acclima_VWC_40_Avg','Acclima_Temp_40_Avg']},
+                    'Teros12':{'5':['Teros12_VWC_5_Avg','Teros12_Temp_5_Avg'],
+                                '20':['Teros12_VWC_20_Avg','Teros12_Temp_20_Avg'],
+                                '40':['Teros12_VWC_40_Avg','Teros12_Temp_40_Avg']},
+                    'Teros21':{'5':['Teros21_Matric_P_5_Avg','Teros21_Temp_5_Avg'],
+                                '20':['Teros21_Matric_P_20_Avg','Teros21_Temp_20_Avg'],
+                                '40':['Teros21_Matric_P_40_Avg','Teros21_Temp_40_Avg']},
+                    'Thetaprobe':{'5':['Thetaprobe_VWC_5_Avg'],
+                                '20':['Thetaprobe_VWC_20_Avg'],
+                                '40':['Thetaprobe_VWC_40_Avg']},
+                    'Hydraprobe':{'5':['Hydraprobe_VWC_5_Avg','Hydraprobe_Temp_5_Deg_C_Avg'],
+                                '20':['Hydraprobe_VWC_20_Avg','Hydraprobe_Temp_20_Deg_C_Avg'],
+                                '40':['Hydraprobe_VWC_40_Avg','Hydraprobe_Temp_40_Deg_C_Avg']},
+                    'CS655':{'5':['CS655_VWC_5_Avg','CS655_Temp_5_Avg'],
+                            '20':['CS655_VWC_20_Avg','CS655_Temp_20_Avg'],
+                            '40':['CS655_VWC_40_Avg','CS655_Temp_40_Avg']},
+                    'SoilVue':{'5':['SoilVue_VWC_5_Avg','SoilVue_Temp_5_Avg'],
+                                '20':['SoilVue_VWC_10_Avg','SoilVue_Temp_10_Avg','SoilVue_VWC_20_Avg','SoilVue_Temp_20_Avg'],
+                                '40':['SoilVue_VWC_30_Avg','SoilVue_Temp_30_Avg','SoilVue_VWC_40_Avg','SoilVue_Temp_40_Avg','SoilVue_VWC_50_Avg','SoilVue_Temp_50_Avg']},
+                    'GroPoint':{'5':['GroPoint_VWC_0_15_Avg','GroPoint_Temp_3_Avg'],
+                                '20':['GroPoint_VWC_15_30_Avg','GroPoint_Temp_10_Avg','GroPoint_Temp_20_Avg'],
+                                '40':['GroPoint_VWC_30_45_Avg','GroPoint_Temp_30_Avg','GroPoint_Temp_40_Avg','GroPoint_Temp_45_Avg']},
+                    'DrillDrop':{'5':['DrillDrop_VWC_5_Avg','DrillDrop_Temp_5_Avg'],
+                                '20':['DrillDrop_VWC_15_Avg','DrillDrop_Temp_15_Avg','DrillDrop_VWC_25_Avg','DrillDrop_Temp_25_Avg'],
+                                '40':['DrillDrop_VWC_35_Avg','DrillDrop_Temp_35_Avg','DrillDrop_VWC_45_Avg','DrillDrop_Temp_45_Avg','DrillDrop_VWC_55_Avg','DrillDrop_Temp_55_Avg']},
+                    }
 
         def plot_data():
             update_status("Processing data")
+            testbed = document.getElementById("testbed-select").value 
             site = document.getElementById("sites-select").value # Note that this is the logger name
-            depth = int(document.getElementById("depths-select").value)
-            variable = document.getElementById("variables-select").value
-            sensors = ['CS655','Hydraprobe','Teros21','Batt','Acclima','Teros12','GroPoint','Thetaprobe','SoilVue','DrillDrop','TE525MM']
 
             # Create a new plot with default tools, using figure
-            p = figure(plot_width=800, plot_height=400, x_axis_type='datetime', toolbar_location="above", title=site)
+            p = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above", title=site)
         
-            root = "https://raw.githubusercontent.com/soilwater/mist/main/data/Kansas_State_University"
+            root = "https://raw.githubusercontent.com/soilwater/mist/main/data"
             counter = 0
-            for sensor in sensors:
-                url = f"{root}/{site}_Table_{sensor}.dat"
+
+            f_vwc_5 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+            f_vwc_20 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+            f_vwc_40 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+
+            f_temp_5 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+            f_temp_20 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+            f_temp_40 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+
+            f_matric_5 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+            f_matric_20 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+            f_matric_40 = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+
+            f_rain = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+            f_batt = figure(plot_width=1000, plot_height=400, x_axis_type='datetime', toolbar_location="above")
+
+            for sensor in sensors.keys():
+                counter += 1
+                url = f"{root}/{testbed}/{site}_Table_{sensor}.dat"
                 url_content = pyodide.http.open_url(url)
                 df = pd.read_csv(url_content,skiprows=[0,2,3],parse_dates=[0], na_values="NAN")
                 
-                for col in df.columns:
-                    col_parts = col.split('_')
+                for var in sensors[sensor]['5']:
+                    if 'VWC' in var:
+                        if df[var].mean() > 1:
+                            df[var] = df[var]/100
+                        f_vwc_5.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                    
+                    if 'Temp' in var:
+                        f_temp_5.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                        
+                    if 'Matric' in var:
+                        f_matric_5.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                    
 
-                    if variable in col and len(col_parts)>1:
-                        col_depth = int(col_parts[2])
+                for var in sensors[sensor]['20']:
+                    if 'VWC' in var:
+                        if df[var].mean() > 1:
+                            df[var] = df[var]/100
+                        f_vwc_20.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                    
+                    if 'Temp' in var:
+                        f_temp_20.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                        
+                    if 'Matric' in var:
+                        f_matric_20.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                
+                for var in sensors[sensor]['40']:
+                    if 'VWC' in var:
+                        if df[var].mean() > 1:
+                            df[var] = df[var]/100
+                        f_vwc_40.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                    
+                    if 'Temp' in var:
+                        f_temp_40.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                        
+                    if 'Matric' in var:
+                        f_matric_40.line(df['TIMESTAMP'],df[var],legend_label=var, color=colors[counter], line_width=2)
+                    
+            url_rain = f"{root}/{testbed}/{site}_Table_TE525MM.dat"
+            url_rain_content = pyodide.http.open_url(url_rain)
+            df_rain = pd.read_csv(url_rain_content,skiprows=[0,2,3],parse_dates=[0], na_values="NAN")
+            f_rain.step(df_rain['TIMESTAMP'],df_rain['TE525MM_Rain_Tot'],legend_label='Precipitation', color='black', line_width=2)
+            f_rain.yaxis.axis_label = 'Precipitation (mm/h)'
 
-                        # Handle GroPoint sensor
-                        if sensor=='GroPoint' and variable=='VWC' and col_depth==0:
-                            col_depth = 5
-                        elif sensor=='GroPoint' and variable=='VWC' and col_depth==15:
-                            col_depth = 20
-                        elif sensor=='GroPoint' and variable=='VWC' and col_depth==30:
-                            col_depth = 40
+            url_batt = f"{root}/{testbed}/{site}_Table_Batt.dat"
+            url_batt_content = pyodide.http.open_url(url_batt)
+            df_batt = pd.read_csv(url_batt_content,skiprows=[0,2,3],parse_dates=[0], na_values="NAN")
+            f_batt.line(df_batt['TIMESTAMP'],df_batt['Batt_Min'],legend_label='Battery', color='black', line_width=2)
+            f_batt.yaxis.axis_label = 'Battery (Voltage)'
 
-                        if depth>=col_depth-5 and depth<=col_depth+5:
-                            if variable=='Temp' and "Deg_F" in col:
-                                continue
-                            
-                            if variable=='VWC' and df[col].mean() > 1:
-                                df[col] = df[col]/100
-                            
-                            counter += 1
-                            p.line(df['TIMESTAMP'], df[col], legend_label=f"{sensor} {col_depth} cm", color=colors[counter], line_width=2)
-            
-            p.yaxis.axis_label = variable
-            p.legend.location = "bottom_left"
-            p.legend.click_policy="hide"
-            p.add_layout(p.legend[0], 'right')
-            p_json = json.dumps(json_item(p, "plot"))    
+            f_vwc_5.legend.location = "bottom_left"
+            f_vwc_5.legend.click_policy="hide"
+            f_vwc_5.add_layout(f_vwc_5.legend[0], 'right')
+            f_vwc_5.yaxis.axis_label = 'VWC (vol/vol)'
+
+            f_vwc_20.legend.location = "bottom_left"
+            f_vwc_20.legend.click_policy="hide"
+            f_vwc_20.add_layout(f_vwc_20.legend[0], 'right')
+            f_vwc_20.yaxis.axis_label = 'VWC (vol/vol)'
+
+            f_vwc_40.legend.location = "bottom_left"
+            f_vwc_40.legend.click_policy="hide"
+            f_vwc_40.add_layout(f_vwc_40.legend[0], 'right')
+            f_vwc_40.yaxis.axis_label = 'VWC (vol/vol)'
+
+            f_temp_5.legend.location = "bottom_left"
+            f_temp_5.legend.click_policy="hide"
+            f_temp_5.add_layout(f_temp_5.legend[0], 'right')
+            f_temp_5.yaxis.axis_label = 'Soil temperature (Celsius)'
+
+            f_temp_20.legend.location = "bottom_left"
+            f_temp_20.legend.click_policy="hide"
+            f_temp_20.add_layout(f_temp_20.legend[0], 'right')
+            f_temp_20.xaxis.axis_label = 'Soil temperature (Celsius)'
+
+            f_temp_40.legend.location = "bottom_left"
+            f_temp_40.legend.click_policy="hide"
+            f_temp_40.add_layout(f_temp_40.legend[0], 'right')
+            f_temp_40.yaxis.axis_label = 'Soil temperature (Celsius)'
+
+            f_matric_5.legend.location = "bottom_left"
+            f_matric_5.legend.click_policy="hide"
+            f_matric_5.add_layout(f_matric_5.legend[0], 'right')
+            f_matric_5.yaxis.axis_label = 'Matric potential (kPa)'
+
+            f_matric_20.legend.location = "bottom_left"
+            f_matric_20.legend.click_policy="hide"
+            f_matric_20.add_layout(f_matric_20.legend[0], 'right')
+            f_matric_20.yaxis.axis_label = 'Matric potential (kPa)'
+
+            f_matric_40.legend.location = "bottom_left"
+            f_matric_40.legend.click_policy="hide"
+            f_matric_40.add_layout(f_matric_40.legend[0], 'right')
+            f_matric_40.yaxis.axis_label = 'Matric potential (kPa)'
+
+            P = column(f_vwc_5,f_vwc_20,f_vwc_40,f_temp_5,f_temp_20,f_temp_40,f_matric_5,f_matric_20,f_matric_40,f_rain,f_batt)
+            p_json = json.dumps(json_item(P, "plot"))    
             Bokeh.embed.embed_item(JSON.parse(p_json))
             update_status("")
 

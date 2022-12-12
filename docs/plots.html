@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>MIST Plots</title>
-
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
@@ -224,21 +223,8 @@
             Bokeh.embed.embed_item(JSON.parse(p_json))
             update_status("")
 
-
+        # Run when loading the page
+        plot_data()
     </py-script>
-
-    <script>
-
-        var sites = ['Site 1', 'Site 2', 'Site 3']
-        var loggers = ['CR300-23667', 'CR300-10553', 'CR300-23666']
-
-        var select = document.getElementById('vwc-options');
-        for (var i=0; i<=sites.length; i++){
-            var opt = document.createElement('option');
-            opt.value = loggers[i];
-            opt.innerHTML = `${sites[i]} (${loggers[i]})`;
-            select.appendChild(opt);
-        }
-    </script>
   </body>
 </html>

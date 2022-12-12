@@ -1,13 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIST Plots</title>
-    <script src="js/plotly_2.16.1.js"></script>
-</head>
-<body>
-    
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>REPL</title>
+
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js"></script>
+
+    <style>
+        .container{
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        #plot{
+            margin-top: 50px;
+        }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="container">
+        <h1>Explore MIST Data</h1>
+        <select id="sites-select">
+            <option value="CR300-23667">KSU Site 1 (CR300-23667)</option>
+            <option value="CR300-10553">KSU Site 2 (CR300-10553)</option>
+            <option value="CR300-23666">KSU Site 3 (CR300-23666)</option>
+        </select>
+        <select id="depths-select">
+            <option value="5">5 cm</option>
+            <option value="20">20 cm</option>
+            <option value="40">40 cm</option>
+        </select>
+        <select id="variables-select">
+            <option value="Temp">Soil temperature</option>
+            <option value="VWC">Volumetric water content</option>
+            <option value="Matric">Matric potential</option>
+            <option value="EC">Electrical conductivity</option>
+            <option value="Perm">Permittivity</option>
+        </select>
+        <button id="btn-plot" py-click="plot_data()">Create plot</button>
+        <br/>
+        <p id="status"></p>
+        <div id="plot"></div>
+    </div>
+
+    <!-- PyScript Code -->
+    <py-config type="json">
+        {
+          "packages": ["pandas", "bokeh"]
+        }
+    </py-config>
+
+    <py-script>
+        import json
+        import pyodide
+   
+        import pandas as pd
+        from js import Bokeh, console, JSON, document
+        from bokeh.embed import json_item
+        from bokeh.plotting import figure
+        from bokeh.resources import CDN
+        from bokeh.palettes import Paired12 as colors
+
+        def update_status(new_status):
+            document.getElementById("status").innerHTML = new_status
+
+        def plot_data():
+            update_status("Processing data")
+            site = document.getElementById("sites-select").value # Note that this is the logger name
+            depth = int(document.getElementById("depths-select").value)
+            variable = document.getElementById("variables-select").value
+            sensors = ['CS655','Hydraprobe','Teros21','Batt','Acclima','Teros12','GroPoint','Thetaprobe','SoilVue','DrillDrop','TE525MM']
+
+            # Create a new plot with default tools, using figure
+            p = figure(plot_width=800, plot_height=400, x_axis_type='datetime', toolbar_location="above", title=site)
+        
+            root = "https://raw.githubusercontent.com/soilwater/mist/main/data/Kansas_State_University"
+            counter = 0
+            for sensor in sensors:
+                url = f"{root}/{site}_Table_{sensor}.dat"
+                url_content = pyodide.http.open_url(url)
+                df = pd.read_csv(url_content,skiprows=[0,2,3],parse_dates=[0], na_values="NAN")
+                
+                for col in df.columns:
+                    col_parts = col.split('_')
+
+                    if variable in col and len(col_parts)>1:
+                        col_depth = int(col_parts[2])
+
+                        # Handle GroPoint sensor
+                        if sensor=='GroPoint' and variable=='VWC' and col_depth==0:
+                            col_depth = 5
+                        elif sensor=='GroPoint' and variable=='VWC' and col_depth==15:
+                            col_depth = 20
+                        elif sensor=='GroPoint' and variable=='VWC' and col_depth==30:
+                            col_depth = 40
+
+                        if depth>=col_depth-5 and depth<=col_depth+5:
+                            if variable=='Temp' and "Deg_F" in col:
+                                continue
+                            
+                            if variable=='VWC' and df[col].mean() > 1:
+                                df[col] = df[col]/100
+                            
+                            counter += 1
+                            p.line(df['TIMESTAMP'], df[col], legend_label=f"{sensor} {col_depth} cm", color=colors[counter], line_width=2)
+            
+            p.yaxis.axis_label = variable
+            p.legend.location = "bottom_left"
+            p.legend.click_policy="hide"
+            p.add_layout(p.legend[0], 'right')
+            p_json = json.dumps(json_item(p, "plot"))    
+            Bokeh.embed.embed_item(JSON.parse(p_json))
+            update_status("")
+
+
+    </py-script>
+
+    <script>
+
+        var sites = ['Site 1', 'Site 2', 'Site 3']
+        var loggers = ['CR300-23667', 'CR300-10553', 'CR300-23666']
+
+        var select = document.getElementById('vwc-options');
+        for (var i=0; i<=sites.length; i++){
+            var opt = document.createElement('option');
+            opt.value = loggers[i];
+            opt.innerHTML = `${sites[i]} (${loggers[i]})`;
+            select.appendChild(opt);
+        }
+    </script>
+  </body>
 </html>

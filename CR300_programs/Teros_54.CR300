@@ -1,0 +1,89 @@
+'Title: Connecting Teros 54 to a CR300 datalogger
+'Date: September 22, 2023
+'Author: Andres Patrignani
+'Correspondence: andrespatrignani@ksu.edu
+
+'Wiring:
+'Brown -> Power (12 V+)
+'White -> Signal (C1)
+'Black -> Ground (G)
+'Blue -> Ground(G)
+'Note: Connect the datalogger to a 12V battery. This code assumes a sensor addressof "0".
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public Teros54(8)
+Public Teros54_VWC_15
+Public Teros54_VWC_30
+Public Teros54_VWC_45
+Public Teros54_VWC_60
+
+Alias Teros54(1) = Teros54_RAW_15
+Alias Teros54(2) = Teros54_Temp_15
+Alias Teros54(3) = Teros54_RAW_30
+Alias Teros54(4) = Teros54_Temp_30
+Alias Teros54(5) = Teros54_RAW_45
+Alias Teros54(6) = Teros54_Temp_45
+Alias Teros54(7) = Teros54_RAW_60
+Alias Teros54(8) = Teros54_Temp_60
+
+Units BattV = Volts
+Units PTemp_C = Deg C
+
+Units Teros54_RAW_15 = mV
+Units Teros54_Temp_15 = Deg C
+Units Teros54_VWC_15 = m^3/m^3
+Units Teros54_RAW_30 = mV
+Units Teros54_Temp_30 = Deg C
+Units Teros54_VWC_30 = m^3/m^3
+Units Teros54_RAW_45 = mV
+Units Teros54_Temp_45 = Deg C
+Units Teros54_VWC_45 = m^3/m^3
+Units Teros54_RAW_60 = mV
+Units Teros54_Temp_60 = Deg C
+Units Teros54_VWC_60 = m^3/m^3
+
+'Define Data Tables
+DataTable(Table1,True,-1)
+	DataInterval(0,60,Sec,10)
+	Average(1,Teros54_RAW_15,FP2,False)
+	Average(1,Teros54_Temp_15,FP2,False)
+	Average(1,Teros54_RAW_30,FP2,False)
+	Average(1,Teros54_Temp_30,FP2,False)
+	Average(1,Teros54_RAW_45,FP2,False)
+	Average(1,Teros54_Temp_45,FP2,False)
+  Average(1,Teros54_RAW_60,FP2,False)
+	Average(1,Teros54_Temp_60,FP2,False)
+	Average(1,Teros54_VWC_15,FP2,False)
+	Average(1,Teros54_VWC_30,FP2,False)
+	Average(1,Teros54_VWC_45,FP2,False)
+	Average(1,Teros54_VWC_60,FP2,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(10,Sec,1,0)
+		'Default CR300 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR300 Datalogger Processor Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'Teros 12 measurements
+    SDI12Recorder(Teros54(),C2,"0","M!",1,0,-1)
+
+    Teros54_VWC_15 = (1.8543*10^-8)*Teros54_RAW_15^3 - (4.1231*10^-5)*Teros54_RAW_15^2 + (3.1015*10^-2)*Teros54_RAW_15 - 7.7224
+    Teros54_VWC_30 = (1.8543*10^-8)*Teros54_RAW_30^3 - (4.1231*10^-5)*Teros54_RAW_30^2 + (3.1015*10^-2)*Teros54_RAW_30 - 7.7224
+    Teros54_VWC_45 = (1.8543*10^-8)*Teros54_RAW_45^3 - (4.1231*10^-5)*Teros54_RAW_45^2 + (3.1015*10^-2)*Teros54_RAW_45 - 7.7224
+    Teros54_VWC_60 = (1.8543*10^-8)*Teros54_RAW_60^3 - (4.1231*10^-5)*Teros54_RAW_60^2 + (3.1015*10^-2)*Teros54_RAW_60 - 7.7224
+
+		'Call Data Tables and Store Data
+		CallTable Table1
+		CallTable Table2
+	NextScan
+EndProg

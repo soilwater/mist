@@ -8,7 +8,7 @@
 'White -> Signal (C1)
 'Black -> Ground (G)
 'Blue -> Ground(G)
-'Note: Connect the datalogger to a 12V battery. This code assumes a sensor addressof "0".
+'Note: Connect the datalogger to a 12V battery. This code assumes a sensor address of "0".
 
 'Declare Variables and Units
 Public BattV
@@ -75,12 +75,15 @@ BeginProg
 		'Default CR300 Datalogger Processor Temperature measurement 'PTemp_C'
 		PanelTemp(PTemp_C,60)
 		'Teros 12 measurements
-    SDI12Recorder(Teros54(),C2,"0","M!",1,0,-1)
 
-    Teros54_VWC_15 = (1.8543*10^-8)*Teros54_RAW_15^3 - (4.1231*10^-5)*Teros54_RAW_15^2 + (3.1015*10^-2)*Teros54_RAW_15 - 7.7224
-    Teros54_VWC_30 = (1.8543*10^-8)*Teros54_RAW_30^3 - (4.1231*10^-5)*Teros54_RAW_30^2 + (3.1015*10^-2)*Teros54_RAW_30 - 7.7224
-    Teros54_VWC_45 = (1.8543*10^-8)*Teros54_RAW_45^3 - (4.1231*10^-5)*Teros54_RAW_45^2 + (3.1015*10^-2)*Teros54_RAW_45 - 7.7224
-    Teros54_VWC_60 = (1.8543*10^-8)*Teros54_RAW_60^3 - (4.1231*10^-5)*Teros54_RAW_60^2 + (3.1015*10^-2)*Teros54_RAW_60 - 7.7224
+		'Read sensor data
+		SDI12Recorder(Teros54(),C2,"0","M!",1,0,-1)
+
+		'Convert RAW sensor values into volumetric water content
+		Teros54_VWC_15 = (1.8543*10^-8)*Teros54_RAW_15^3 - (4.1231*10^-5)*Teros54_RAW_15^2 + (3.1015*10^-2)*Teros54_RAW_15 - 7.7224
+		Teros54_VWC_30 = (1.8543*10^-8)*Teros54_RAW_30^3 - (4.1231*10^-5)*Teros54_RAW_30^2 + (3.1015*10^-2)*Teros54_RAW_30 - 7.7224
+		Teros54_VWC_45 = (1.8543*10^-8)*Teros54_RAW_45^3 - (4.1231*10^-5)*Teros54_RAW_45^2 + (3.1015*10^-2)*Teros54_RAW_45 - 7.7224
+		Teros54_VWC_60 = (1.8543*10^-8)*Teros54_RAW_60^3 - (4.1231*10^-5)*Teros54_RAW_60^2 + (3.1015*10^-2)*Teros54_RAW_60 - 7.7224
 
 		'Call Data Tables and Store Data
 		CallTable Table1

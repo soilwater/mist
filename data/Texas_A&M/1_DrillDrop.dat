@@ -1,4 +1,7 @@
-TIMESTAMP,RECORD,station,latitude,longitude,altitude,BattV,DD_5_VWC_Avg,DD_15_VWC_Avg,DD_25_VWC_Avg,DD_35_VWC_Avg,DD_45_VWC_Avg,DD_55_VWC_Avg,DD_5_Temp_Avg,DD_15_Temp_Avg,DD_25_Temp_Avg,DD_35_Temp_Avg,DD_45_Temp_Avg,DD_55_Temp_Avg,DD_5_Sal_Avg,DD_15_Sal_Avg,DD_25_Sal_Avg,DD_35_Sal_Avg,DD_45_Sal_Avg,DD_55_Sal_Avg
+"TOA5","1","CR300","1438","CR300.Std.07.00","CPU:Site 1 (Field).CR300","25977","DrillDrop"
+"TIMESTAMP","RECORD","station","latitude","longitude","altitude","BattV","DD_5_VWC_Avg","DD_15_VWC_Avg","DD_25_VWC_Avg","DD_35_VWC_Avg","DD_45_VWC_Avg","DD_55_VWC_Avg","DD_5_Temp_Avg","DD_15_Temp_Avg","DD_25_Temp_Avg","DD_35_Temp_Avg","DD_45_Temp_Avg","DD_55_Temp_Avg","DD_5_Sal_Avg","DD_15_Sal_Avg","DD_25_Sal_Avg","DD_35_Sal_Avg","DD_45_Sal_Avg","DD_55_Sal_Avg"
+"TS","RN","name","decdegrees","decdegrees","m","Volts","%","%","%","%","%","%","Deg C","Deg C","Deg C","Deg C","Deg C","Deg C","VIC","VIC","VIC","VIC","VIC","VIC"
+"","","Smp","Smp","Smp","Smp","Smp","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg"
 2023-02-17 14:00:00,0,Site 1,30.55085,-96.41281,75,12.73,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 2023-02-17 15:00:00,1,Site 1,30.55085,-96.41281,75,12.77,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 2023-02-17 16:00:00,2,Site 1,30.55085,-96.41281,75,12.9,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
